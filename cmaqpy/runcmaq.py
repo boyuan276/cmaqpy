@@ -62,7 +62,11 @@ class CMAQModel:
     --------
     SMOKEModel: setup and run the SMOKE model. 
     """
-    def __init__(self, start_datetime, end_datetime, appl, coord_name, grid_name, chem_mech='cb6r3_ae7_aq', cctm_vrsn='v533', setup_yaml='dirpaths.yml', compiler='gcc', compiler_vrsn='9.3.1', new_mcip=True, new_icon=False, icon_vrsn='v532', icon_type='regrid', new_bcon=True, bcon_vrsn='v532', bcon_type='regrid', verbose=False):
+    def __init__(self, start_datetime, end_datetime, appl, coord_name, grid_name, 
+                 chem_mech='cb6r3_ae7_aq', cctm_vrsn='v533', setup_yaml='dirpaths.yml', 
+                 compiler='gcc', compiler_vrsn='9.3.1', new_mcip=True, new_icon=False, 
+                 icon_vrsn='v532', icon_type='regrid', new_bcon=True, bcon_vrsn='v532', 
+                 bcon_type='regrid', verbose=False):
         self.appl = appl
         self.coord_name = coord_name
         self.grid_name = grid_name
@@ -163,14 +167,15 @@ class CMAQModel:
         # Define the names of the CMAQ output files
         #### Maybe use this in the future ####
 
-        # Define linux command aliai
+        # Define linux command aliases
         self.CMD_LN = 'ln -sf %s %s'
         self.CMD_CP = 'cp %s %s'
         self.CMD_MV = 'mv %s %s'
         self.CMD_RM = 'rm %s'
         self.CMD_GUNZIP = 'gunzip %s'
 
-    def run_mcip(self, mcip_start_datetime=None, mcip_end_datetime=None, metfile_list=[], geo_file='geo_em.d01.nc', t_step=60, run_hours=4, setup_only=False):
+    def run_mcip(self, mcip_start_datetime=None, mcip_end_datetime=None, metfile_list=[], 
+                 geo_file='geo_em.d01.nc', t_step=60, run_hours=4, setup_only=False):
         """
         Setup and run MCIP, which formats meteorological files (e.g. wrfout*.nc) for CMAQ.
 
@@ -331,7 +336,6 @@ class CMAQModel:
             # run mcip for that day
             self.run_mcip(mcip_start_datetime=mcip_start_datetime, mcip_end_datetime=mcip_end_datetime, metfile_list=metfile_list, geo_file=geo_file, t_step=t_step, setup_only=False) 
         
-
     def run_icon(self, coarse_grid_appl='coarse', run_hours=2, setup_only=False):
         """
         Setup and run ICON, which produces initial conditions for CMAQ.
@@ -430,7 +434,7 @@ class CMAQModel:
         return True
 
     def run_bcon(self, bcon_start_datetime=None, bcon_end_datetime=None, coarse_grid_appl='coarse', 
-        run_hours=2, setup_only=False):
+                 run_hours=2, setup_only=False):
         """
         Setup and run BCON, which produces boundary conditions for CMAQ.
 
