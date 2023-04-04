@@ -1,10 +1,17 @@
+AUTHORS.md
+LICENSE
 README.md
 setup.py
 cmaqpy/__init__.py
+cmaqpy/plots.py
+cmaqpy/prepemis.py
 cmaqpy/runcmaq.py
+cmaqpy/runsmoke.py
 cmaqpy/utils.py
 cmaqpy.egg-info/PKG-INFO
 cmaqpy.egg-info/SOURCES.txt
 cmaqpy.egg-info/dependency_links.txt
 cmaqpy.egg-info/requires.txt
 cmaqpy.egg-info/top_level.txt
+cmaqpy/test/__init__.py
+cmaqpy/test/test_runcmaq.py

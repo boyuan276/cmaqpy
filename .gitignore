@@ -35,5 +35,4 @@ FILE*
 **/.pytest_cache/
 default-*
 **/.ipynb_checkpoints*
-*.egg-info/
 *-jvsc-*
