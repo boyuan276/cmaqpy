@@ -1,7 +1,7 @@
 #!/bin/csh -f
 #SBATCH -J ptertac_summer		# Job name
 %SLURM%
-#SBATCH -o /share/mzhang/jas983/emissions_data/nei_platform2016/v1/2016fh_16j/intermed/ptertac/logs/out_ptertac_summer.%j		# Name of stdout output file (%j expands to jobId) 
+#SBATCH -o /mnt/data1/by276/emissions_data/nei_platform2016/v1/2016fh_16j/intermed/ptertac/logs/out_ptertac_summer.%j		# Name of stdout output file (%j expands to jobId) 
 
 limit stacksize unlimited
 limit memoryuse unlimited
