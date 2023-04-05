@@ -93,7 +93,7 @@ setenv CTM_ADV_CFL 0.95      #> max CFL [ default: 0.75]
 #setenv RB_ATOL 1.0E-09      #> global ROS3 solver absolute tolerance [ default: 1.0E-07 ] 
 
 #> Science Options
-setenv CTM_OCEAN_CHEM Y      #> Flag for ocean halgoen chemistry and sea spray aerosol emissions [ default: Y ]
+setenv CTM_OCEAN_CHEM N      #> Flag for ocean halgoen chemistry and sea spray aerosol emissions [ default: Y ]
 setenv CTM_WB_DUST N         #> use inline windblown dust emissions [ default: Y ]
 setenv CTM_WBDUST_BELD BELD3 #> landuse database for identifying dust source regions 
                              #>    [ default: UNKNOWN ]; ignore if CTM_WB_DUST = N 
@@ -278,6 +278,13 @@ while ($TODAYJ <= $STOP_DAY )  #>Compare dates in terms of YYYYJJJ
    #>   https://github.com/USEPA/CMAQ/blob/main/DOCS/Users_Guide/Appendix/CMAQ_UG_appendixB_emissions_control.md 
    #>
    setenv EMISSCTRL_NML ${BLD}/EmissCtrl_${MECH}.nml
+   setenv DESID_CTRL_NML ${BLD}/CMAQ_Control_DESID.nml ###BO
+   setenv DESID_CHEM_CTRL_NML ${BLD}/CMAQ_Control_DESID_${MECH}.nml ###BO
+
+   #> The following namelist configures aggregated output (via the Explicit and Lumped
+   #> Air Quality Model Output (ELMO) Module), domain-wide budget output, and chemical
+   #> family output.
+   setenv MISC_CTRL_NML ${BLD}/CMAQ_Control_Misc.nml ###BO
 
    #> Spatial Masks For Emissions Scaling
    setenv CMAQ_MASKS $SZpath/12US1_surf.12otc2.ncf #> horizontal grid-dependent surf zone file
