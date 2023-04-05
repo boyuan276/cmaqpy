@@ -36,3 +36,4 @@ FILE*
 default-*
 **/.ipynb_checkpoints*
 *-jvsc-*
+lib/
