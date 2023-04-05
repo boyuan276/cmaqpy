@@ -788,6 +788,7 @@ class CMAQModel:
         cctm_runtime =  f'#> Toggle Diagnostic Mode which will print verbose information to standard output\n'
         cctm_runtime += f'setenv CTM_DIAG_LVL 0\n'
         cctm_runtime += f'#> Source the config_cmaq file to set the run environment\n'
+        cctm_runtime += f'cd {self.CMAQ_HOME}\n'
         cctm_runtime += f'source {self.CMAQ_HOME}/config_cmaq.csh {self.compiler} {self.compiler_vrsn}\n'
         cctm_runtime += f'#> Change back to the CCTM scripts directory\n'
         cctm_runtime += f'cd {self.CCTM_SCRIPTS}\n'
