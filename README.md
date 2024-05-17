@@ -1,6 +1,7 @@
 This repository holds python code to help facilitate running and processing CMAQ simulations.
 
 Instructions for running two scenarios (a base case and a with renewables scenario) for the DEC's 12OTC2 domain (12 km spatial resolution) and 4OTC2 domain (4 km spatial resolution) are included in this README.
+
 *NOTE*: I'm not sure if this package allows you to run multiple instances of CMAQModel simultaneously. 
 
 ## Run a new simulation on the 12-km domain
