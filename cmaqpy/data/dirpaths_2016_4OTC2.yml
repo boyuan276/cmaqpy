@@ -17,7 +17,7 @@ directory_paths:
   LOC_ERTAC: '/mnt/data1/by276/emissions_data/nei_platform2016/v1/2016fh_16j/smoke_out/2016fh_16j/4OTC2/cmaq_cb6/ptertac_s0'
   LOC_SMK_MERGE_DATES: '/mnt/data1/by276/emissions_data/2016v1/12OTC2/emis/smk_dates/2016'
   LOC_LAND: '/mnt/data1/by276/emissions_data/2016v1/4OTC2/land'
-  LOC_MCIP: '/mnt/data1/by276/cmaq_data/CMAQ_v5.3.3/2016_4OTC2/mcip'
+  LOC_MCIP: '/mnt/data1/by276/cmaq_data/CMAQ_v5.4/data/2016_4OTC2/mcip'
   ERTAC_HOME: '/mnt/data1/by276/ertac_egu'
   SMOKE_HOME: '/home/by276/models/smoke/smokev4.7'
 file_paths:
