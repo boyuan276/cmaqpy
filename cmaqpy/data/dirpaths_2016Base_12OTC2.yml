@@ -1,10 +1,10 @@
 # List your directory paths in this file; the others will be dependent on these.
 # Set up for EERL3 mounted drive data1.
 directory_paths:
-  DIR_CMAQPY: '/mnt/data1/by276/cmaq_data/CMAQ_v5.4/cmaqpy'
-  CMAQ_HOME: '/mnt/data1/by276/cmaq_data/CMAQ_v5.4'
-  CMAQ_DATA: '/mnt/data1/by276/cmaq_data/CMAQ_v5.4/data'
-  DIR_TEMPLATES: '/mnt/data1/by276/cmaq_data/CMAQ_v5.4/cmaqpy/templates'
+  DIR_CMAQPY: '/mnt/Bo_HDD2/cmaq_data/CMAQ_v5.4/cmaqpy'
+  CMAQ_HOME: '/mnt/Bo_HDD2/cmaq_data/CMAQ_v5.4'
+  CMAQ_DATA: '/mnt/Bo_HDD2/cmaq_data/CMAQ_v5.4/data'
+  DIR_TEMPLATES: '/mnt/Bo_HDD2/cmaq_data/CMAQ_v5.4/cmaqpy/templates'
   InMetDir: '/mnt/data1/by276/wrf_data/met4ene/wrfout/ARW/for_cmaq/2016-08-05_8mp4lw2sw2lsm5pbl3cu'
   InGeoDir: '/mnt/data1/by276/wrf_data/data/domain/otc'
   NEI_HOME: '/mnt/data1/by276/emissions_data/nei_platform2016/v1'
