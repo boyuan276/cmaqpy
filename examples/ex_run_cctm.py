@@ -73,13 +73,16 @@ elif grid_name == '4OTC2':
                          new_bcon=True, bcon_vrsn='v54',
                          verbose=True)
     # Call the "run_cctm" method
-    # Note taht we turn off the ammonia bi-directional flux for in-line deposition (ctm_abflux='N') for the 4km domain
+    # Note that we turn off the ammonia bi-directional flux for in-line deposition (ctm_abflux='N') for the 4km domain
     cmaq_sim.run_cctm(n_emis_gr=3, gr_emis_labs=['all', 'rwc', 'beis'], n_emis_pt=7,
                       pt_emis_labs=['ptnonertac', 'ptertac', 'ptagfire',
                                     'ptfire', 'pt_oilgas', 'cmv_c1c2_4', 'cmv_c3_4'],
                       stkgrps_daily=[False, False, True,
                                      True, False, False, False],
                       ctm_abflux='N',
-                      stkcaseg='12US1_2016fh_16j', stkcasee='12US1_cmaq_cb6_2016fh_16j',
-                      delete_existing_output='TRUE', new_sim='FALSE', tstep='010000',
-                      cctm_hours=24, n_procs=48, gb_mem=50, run_hours=72, setup_only=False)
+                      stkcaseg='12US1_2016fh_16j', 
+                      stkcasee='12US1_cmaq_cb6_2016fh_16j',
+                      delete_existing_output='TRUE', 
+                      new_sim='FALSE', tstep='010000',
+                      cctm_hours=24, n_procs=48, gb_mem=50, 
+                      run_hours=72, setup_only=False)
