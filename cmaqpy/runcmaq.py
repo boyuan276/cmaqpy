@@ -1001,7 +1001,7 @@ class CMAQModel:
                 sys.stdout.flush()
         return True
 
-    def run_combine(self, run_hours=2, mem_per_node=20, combine_vrsn='v532'):
+    def run_combine(self, run_hours=2, mem_per_node=20, combine_vrsn='v54'):
         """
         Setup and run the combine program. Combine is a CMAQ post-processing program that formats 
         the CCTM output data in a more convenient way.
