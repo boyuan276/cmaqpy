@@ -21,16 +21,21 @@ def format_date(in_date):
         string specifying the date
     :return: datetime64 array specifying the date
     """
-    for fmt in ('%b %d %Y', '%B %d %Y', '%b %d, %Y', '%B %d, %Y',
-                '%m-%d-%Y', '%m.%d.%Y', '%m/%d/%Y',
-                '%Y-%m-%d', '%Y.%m.%d', '%Y/%m/%d',
-                '%b %d %Y %H', '%B %d %Y %H', '%b %d, %Y %H', '%B %d, %Y %H',
-                '%m-%d-%Y %H', '%m.%d.%Y %H', '%m/%d/%Y %H'):
-        try:
-            return datetime.datetime.strptime(in_date, fmt)
-        except ValueError:
-            pass
-    raise ValueError('No valid date format found; please use a common US format (e.g., Jan 01, 2011 00)')
+    if isinstance(in_date, datetime.datetime):
+        return in_date
+    elif isinstance(in_date, str):
+        for fmt in ('%b %d %Y', '%B %d %Y', '%b %d, %Y', '%B %d, %Y',
+                    '%m-%d-%Y', '%m.%d.%Y', '%m/%d/%Y',
+                    '%Y-%m-%d', '%Y.%m.%d', '%Y/%m/%d',
+                    '%b %d %Y %H', '%B %d %Y %H', '%b %d, %Y %H', '%B %d, %Y %H',
+                    '%m-%d-%Y %H', '%m.%d.%Y %H', '%m/%d/%Y %H'):
+            try:
+                return datetime.datetime.strptime(in_date, fmt)
+            except ValueError:
+                pass
+        raise ValueError('No valid date format found; please use a common US format (e.g., Jan 01, 2011 00)')
+    else:
+        raise ValueError('Input date must be a string or a datetime object.')
 
 
 def strfdelta(tdelta, fmt='{H:02}h {M:02}m {S:02}s', inputtype='timedelta'):
