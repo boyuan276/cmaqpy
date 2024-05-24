@@ -22,9 +22,6 @@
  endif
  echo " "; echo " Input data path, CMAQ_DATA set to $CMAQ_DATA"; echo " "
 
-#> Set the working directory:
- set BLD      = ${CMAQ_HOME}/PREP/icon/scripts/BLD_ICON_${VRSN}_${compilerString}
- set EXEC     = ICON_${VRSN}.exe  
  cat $BLD/ICON_${VRSN}.cfg; echo " "; set echo
 
 # =====================================================================

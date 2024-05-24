@@ -154,9 +154,6 @@ class CMAQModel:
         else:
             self.LOC_BC = self.dirpaths.get('LOC_BC')
 
-        self.LOC_GRIDDED_AREA = self.dirpaths.get('LOC_GRIDDED_AREA')
-        self.LOC_RWC = self.dirpaths.get('LOC_RWC')  # FIXME: Not defined in the dirpaths.yml file. LOC_GR_EMIS_001.
-        self.LOC_BEIS = self.dirpaths.get('LOC_BEIS')  # FIXME: Note defined in the dirpaths.yml file. LOC_GR_EMIS_002.
         self.LOC_IN_PT = self.dirpaths.get('LOC_IN_PT')
         self.LOC_ERTAC = self.dirpaths.get('LOC_ERTAC')
         self.LOC_SMK_MERGE_DATES = self.dirpaths.get('LOC_SMK_MERGE_DATES')
@@ -205,7 +202,8 @@ class CMAQModel:
         :setup_only: bool
             Option to setup the directories and write the scripts without running MCIP.
         """
-        ## SETUP MCIP
+        
+        # %% SETUP MCIP
         if mcip_start_datetime is None:
             mcip_start_datetime = self.start_datetime
         else:
@@ -214,9 +212,11 @@ class CMAQModel:
             mcip_end_datetime = self.end_datetime
         else:
             mcip_end_datetime = utils.format_date(mcip_end_datetime)
+        
         # Set an 'MCIP APPL,' which will control file names
         mcip_sdatestr = mcip_start_datetime.strftime("%y%m%d")
         self.mcip_appl = f'{self.appl}_{mcip_sdatestr}'
+        
         # Remove existing log file
         cmd = self.CMD_RM % (f'{self.MCIP_SCRIPTS}/run_mcip_{self.mcip_appl}.log')
         os.system(cmd)
@@ -248,7 +248,7 @@ class CMAQModel:
         mcip_io += f'set InMetDir   = {self.InMetDir}\n'
         mcip_io += f'set InGeoDir   = {self.InGeoDir}\n'
         mcip_io += f'set OutDir     = {self.MCIP_OUT}\n'
-        mcip_io += f'set ProgDir    = $CMAQ_HOME/PREP/mcip/src\n'
+        mcip_io += f'set ProgDir    = {self.CMAQ_HOME}/PREP/mcip/src\n'
         mcip_io += f'set WorkDir    = $OutDir\n'
         utils.write_to_template(run_mcip_path, mcip_io, id='%IO%')
 
@@ -280,7 +280,7 @@ class CMAQModel:
         if self.verbose:
             print(f'Wrote MCIP run script to\n{run_mcip_path}')
 
-        ## RUN MCIP
+        # %% RUN MCIP
         if not setup_only:
             # Begin MCIP simulation clock
             simstart = datetime.datetime.now()
@@ -321,6 +321,7 @@ class CMAQModel:
             Time step (MCIP INTVL parameter) of output data in minutes. Defaults to 60 
             min (1 hour).
         """
+        
         # Loop over each day
         for day_no in range(self.delt.days):
             success = False
@@ -342,12 +343,19 @@ class CMAQModel:
             self.run_mcip(mcip_start_datetime=mcip_start_datetime, mcip_end_datetime=mcip_end_datetime,
                           metfile_list=metfile_list, geo_file=geo_file, t_step=t_step, setup_only=False)
 
-    def run_icon(self, coarse_grid_appl='coarse', run_hours=2, setup_only=False):
+    def run_icon(self, icon_start_datetime=None, icon_end_datetime=None, 
+                 coarse_grid_appl='coarse', run_hours=2, setup_only=False):
         """
         Setup and run ICON, which produces initial conditions for CMAQ.
 
         Parameters
         ----------
+        :param icon_start_datetime: string
+            Start date and time for BCON. Defaults to None in which case the BCON start 
+            datetime will be assigned from the CMAQ start datetime.
+        :param icon_end_datetime: string
+            End date and time for BCON. Defaults to None in which case the BCON end 
+            datetime will be assigned from the CMAQ end datetime.
         :param coarse_grid_appl: string
             Application name for the coarse grid from which you are deriving initial conditions.
         :param run_hours: int
@@ -356,15 +364,33 @@ class CMAQModel:
             Option to setup the directories and write the scripts without running ICON.
         """
 
+        # Set the start and end dates
+        if icon_start_datetime is None:
+            icon_start_datetime = self.start_datetime
+        else:
+            icon_start_datetime = utils.format_date(icon_start_datetime)
+        if icon_end_datetime is None:
+            icon_end_datetime = self.end_datetime
+        else:
+            icon_end_datetime = utils.format_date(icon_end_datetime)
+        # Determine the length of the ICON run
+        icon_delt = icon_end_datetime - icon_start_datetime
+        
+        # Define the coarse grid runid
+        coarse_runid = f'{self.cctm_vrsn}_{self.compiler}{self.compiler_vrsn}_{coarse_grid_appl}'
+
         # %% SETUP ICON
         # Copy the template ICON run script to the scripts directory
         run_icon_path = f'{self.ICON_SCRIPTS}/run_icon.csh'
         cmd = self.CMD_CP % (f'{self.DIR_TEMPLATES}/template_run_icon.csh', run_icon_path)
         os.system(cmd)
 
+        # Specify the BCON log
+        icon_log_file = f'{self.ICON_SCRIPTS}/run_icon_{self.appl}_{icon_start_datetime.strftime("%Y%m%d")}.log'
+
         # Write Slurm info
         icon_slurm = f'#SBATCH -J icon_{self.appl}		# Job name\n'
-        icon_slurm += f'#SBATCH -o {self.ICON_SCRIPTS}/run_icon_{self.appl}.log\n'
+        icon_slurm += f'#SBATCH -o {icon_log_file}\n'
         icon_slurm += f'#SBATCH --nodes=1		# Total number of nodes requested\n'
         icon_slurm += f'#SBATCH --ntasks=1		# Total number of tasks to be configured for.\n'
         icon_slurm += f'#SBATCH --tasks-per-node=1	# sets number of tasks to run on each node.\n'
@@ -378,41 +404,50 @@ class CMAQModel:
         # Write ICON runtime info to the run script.
         icon_runtime = f'#> Source the config_cmaq file to set the run environment\n'
         icon_runtime += f'source {self.CMAQ_HOME}/config_cmaq.csh {self.compiler} {self.compiler_vrsn}\n'
-        #> Code Version
+        icon_runtime += f'#> Code Version\n'
         icon_runtime += f'set VRSN     = {self.icon_vrsn}\n'
-        #> Application Name                    
+        icon_runtime += f'#> Application Name\n'                    
         icon_runtime += f'set APPL       = {self.appl}\n'
-        #> Initial conditions type [profile|regrid]
-        icon_runtime += f'ICTYPE   = {self.icon_type}\n'
-        #> check GRIDDESC file for GRID_NAME options
+        icon_runtime += f'#> Initial conditions type [profile|regrid]\n'
+        icon_runtime += f'set ICTYPE   = {self.icon_type}\n'
+        icon_runtime += f'#> check GRIDDESC file for GRID_NAME options\n'
         icon_runtime += f'setenv GRID_NAME {self.grid_name}\n'
-        #> grid description file path
+        icon_runtime += f'#> grid description file path\n'
         icon_runtime += f'setenv GRIDDESC {self.CMAQ_DATA}/{self.appl}/mcip/GRIDDESC\n'
-        #> GCTP spheroid, use 20 for WRF-based modeling
+        icon_runtime += f'#> GCTP spheroid, use 20 for WRF-based modeling\n'
         icon_runtime += f'setenv IOAPI_ISPH 20\n'
-        #> turn on excess WRITE3 logging [ options: T | F ]
+        icon_runtime += f'#> turn on excess WRITE3 logging [ options: T | F ]\n'
         icon_runtime += f'setenv IOAPI_LOG_WRITE F\n'
-        #> support large timestep records (>2GB/timestep record) [ options: YES | NO ]     
+        icon_runtime += f'#> support large timestep records (>2GB/timestep record) [ options: YES | NO ]\n'
         icon_runtime += f'setenv IOAPI_OFFSET_64 YES\n'
-        #> output file directory   
-        icon_runtime += f'OUTDIR   = {self.CMAQ_DATA}/{self.appl}/icon\n'
-        #> define the model execution id
+        icon_runtime += f'#> output file directory\n'
+        icon_runtime += f'set OUTDIR   = {self.CMAQ_DATA}/{self.appl}/icon\n'
+        icon_runtime += f'#> Set the build directory:\n'
+        icon_runtime += f'set BLD      = {self.CMAQ_HOME}/PREP/icon/scripts/BLD_ICON_{self.icon_vrsn}_{self.compiler}{self.compiler_vrsn}\n'
+        icon_runtime += f'set EXEC     = ICON_{self.icon_vrsn}.exe\n'
+        icon_runtime += f'#> define the model execution id\n'
         icon_runtime += f'setenv EXECUTION_ID $EXEC\n'
         utils.write_to_template(run_icon_path, icon_runtime, id='%RUNTIME%')
 
         # Write input file info to the run script
-        icon_files = f'    setenv SDATE           {self.start_datetime.strftime("%Y%j")}\n'
-        icon_files += f'    setenv STIME           {self.start_datetime.strftime("%H%M%S")}\n'
+        # Write input file info to the run script
+        icon_files = f'set DATE = {icon_start_datetime.strftime("%Y-%m-%d")}\n'
+        icon_files += f'set YYYYJJJ  = `date -ud "$DATE" +%Y%j`   #> Convert YYYY-MM-DD to YYYYJJJ\n'
+        icon_files += f'set YYMMDD   = `date -ud "$DATE" +%y%m%d` #> Convert YYYY-MM-DD to YYMMDD\n'
+        icon_files += f'set YYYYMMDD = `date -ud "$DATE" +%Y%m%d` #> Convert YYYY-MM-DD to YYYYMMDD\n'
+        icon_files += f'#setenv SDATE           {icon_start_datetime.strftime("%Y%j")}\n'
+        icon_files += f'#setenv STIME           {icon_start_datetime.strftime("%H%M%S")}\n'
+
         icon_files += f'if ( $ICON_TYPE == regrid ) then\n'
-        icon_files += f'    setenv CTM_CONC_1 {self.CMAQ_DATA}/{coarse_grid_appl}/output_{self.cctm_runid}/CCTM_CONC_{self.cctm_runid}_{self.start_datetime.strftime("%Y%m%d")}.nc\n'
-        icon_files += f'    setenv MET_CRO_3D_CRS {self.CMAQ_DATA}/{coarse_grid_appl}/mcip/METCRO3D_{self.start_datetime.strftime("%y%m%d")}\n'
-        icon_files += f'    setenv MET_CRO_3D_FIN {self.CMAQ_DATA}/{self.appl}/mcip/METCRO3D_{self.start_datetime.strftime("%y%m%d")}.nc\n'
-        icon_files += f'    setenv INIT_CONC_1    "$OUTDIR/ICON_{self.icon_vrsn}_{self.appl}_{self.icon_type}_{self.start_datetime.strftime("%Y%m%d")} -v"\n'
+        icon_files += f'    setenv CTM_CONC_1 {self.CMAQ_DATA}/{coarse_grid_appl}/output_CCTM_{coarse_runid}/CCTM_CONC_{coarse_runid}_{icon_start_datetime.strftime("%Y%m%d")}.nc\n'
+        icon_files += f'    setenv MET_CRO_3D_CRS {self.CMAQ_DATA}/{coarse_grid_appl}/mcip/METCRO3D_{icon_start_datetime.strftime("%y%m%d")}.nc\n'
+        icon_files += f'    setenv MET_CRO_3D_FIN {self.CMAQ_DATA}/{self.appl}/mcip/METCRO3D_{icon_start_datetime.strftime("%y%m%d")}.nc\n'
+        icon_files += f'    setenv INIT_CONC_1    "$OUTDIR/ICON_{self.icon_vrsn}_{self.appl}_{self.icon_type}_{icon_start_datetime.strftime("%Y%m%d")} -v"\n'
         icon_files += f'endif\n'
         icon_files += f'if ( $ICON_TYPE == profile ) then\n'
         icon_files += f'    setenv IC_PROFILE $BLD/avprofile_cb6r3m_ae7_kmtbr_hemi2016_v53beta2_m3dry_col051_row068.csv\n'
         icon_files += f'    setenv MET_CRO_3D_FIN {self.CMAQ_DATA}/{self.appl}/mcip/METCRO3D_{self.start_datetime.strftime("%y%m%d")}.nc\n'
-        icon_files += f'    setenv INIT_CONC_1    "$OUTDIR/ICON_{self.icon_vrsn}_{self.appl}_{self.icon_type}_{self.start_datetime.strftime("%Y%m%d")} -v"\n'
+        icon_files += f'    setenv INIT_CONC_1    "$OUTDIR/ICON_{self.icon_vrsn}_{self.appl}_{self.icon_type}_{icon_start_datetime.strftime("%Y%m%d")} -v"\n'
         icon_files += f'endif\n'
         utils.write_to_template(run_icon_path, icon_files, id='%INFILES%')
 
@@ -439,6 +474,32 @@ class CMAQModel:
             if self.verbose:
                 print(f'ICON ran in: {utils.strfdelta(elapsed)}')
         return True
+    
+    def run_icon_multiday(self, coarse_grid_appl='coarse', run_hours=2, setup_only=False):
+        """
+        Run ICON over multiple days. Per CMAQ convention, ICON will run for the same length
+        as CCTM -- i.e., a single day. 
+
+        Parameters
+        ----------
+        :param coarse_grid_appl: string
+            Application name for the coarse grid from which you are deriving boundary conditions.
+        :param run_hours: int
+            Number of hours to request from the scheduler.
+        :setup_only: bool
+            Option to setup the directories and write the scripts without running BCON.
+        """
+        # Loop over each day
+        for day_no in range(self.delt.days):
+            # Set the start datetime and end datetime for the day
+            icon_start_datetime = self.start_datetime + datetime.timedelta(day_no)
+            icon_end_datetime = self.start_datetime + datetime.timedelta(day_no + 1)
+            if self.verbose:
+                print(f'--> Working on ICON for {icon_start_datetime}')
+
+            # run bcon for that day
+            self.run_icon(icon_start_datetime=icon_start_datetime, icon_end_datetime=icon_end_datetime,
+                          coarse_grid_appl=coarse_grid_appl, run_hours=run_hours, setup_only=setup_only)
 
     def run_bcon(self, bcon_start_datetime=None, bcon_end_datetime=None, coarse_grid_appl='coarse',
                  run_hours=2, setup_only=False):
@@ -460,6 +521,7 @@ class CMAQModel:
         :setup_only: bool
             Option to setup the directories and write the scripts without running BCON.
         """
+        
         # Set the start and end dates
         if bcon_start_datetime is None:
             bcon_start_datetime = self.start_datetime
@@ -475,7 +537,7 @@ class CMAQModel:
         # Define the coarse grid runid
         coarse_runid = f'{self.cctm_vrsn}_{self.compiler}{self.compiler_vrsn}_{coarse_grid_appl}'
 
-        ## SETUP BCON
+        # %% SETUP BCON
         # Copy the template BCON run script to the scripts directory
         run_bcon_path = f'{self.BCON_SCRIPTS}/run_bcon.csh'
         cmd = self.CMD_CP % (f'{self.DIR_TEMPLATES}/template_run_bcon.csh', run_bcon_path)
@@ -526,11 +588,15 @@ class CMAQModel:
         utils.write_to_template(run_bcon_path, bcon_runtime, id='%RUNTIME%')
 
         # Write input file info to the run script
-        # bcon_files =  f'    setenv SDATE           {bcon_start_datetime.strftime("%Y%j")}\n'
-        # bcon_files += f'    setenv STIME           {bcon_start_datetime.strftime("%H%M%S")}\n'
-        # bcon_files += f'    setenv RUNLEN          {utils.strfdelta(bcon_delt, fmt="{H:02}{M:02}{S:02}")}\n'   
+        bcon_files = f'set DATE = {bcon_start_datetime.strftime("%Y-%m-%d")}\n'
+        bcon_files += f'set YYYYJJJ  = `date -ud "$DATE" +%Y%j`   #> Convert YYYY-MM-DD to YYYYJJJ\n'
+        bcon_files += f'set YYMMDD   = `date -ud "$DATE" +%y%m%d` #> Convert YYYY-MM-DD to YYMMDD\n'
+        bcon_files += f'set YYYYMMDD = `date -ud "$DATE" +%Y%m%d` #> Convert YYYY-MM-DD to YYYYMMDD\n'
+        bcon_files += f'#setenv SDATE           {bcon_start_datetime.strftime("%Y%j")}\n'
+        bcon_files += f'#setenv STIME           {bcon_start_datetime.strftime("%H%M%S")}\n'
+        bcon_files += f'#setenv RUNLEN          {utils.strfdelta(bcon_delt, fmt="{H:02}{M:02}{S:02}")}\n'
 
-        bcon_files = f' if ( $BCON_TYPE == regrid ) then\n'
+        bcon_files += f' if ( $BCON_TYPE == regrid ) then\n'
         bcon_files += f'     setenv CTM_CONC_1 {self.CMAQ_DATA}/{coarse_grid_appl}/output_CCTM_{coarse_runid}/CCTM_CONC_{coarse_runid}_{bcon_start_datetime.strftime("%Y%m%d")}.nc\n'
         bcon_files += f'     setenv MET_CRO_3D_CRS {self.CMAQ_DATA}/{coarse_grid_appl}/mcip/METCRO3D_{bcon_start_datetime.strftime("%y%m%d")}.nc\n'
         bcon_files += f'     setenv MET_BDY_3D_FIN {self.CMAQ_DATA}/{self.appl}/mcip/METBDY3D_{bcon_start_datetime.strftime("%y%m%d")}.nc\n'

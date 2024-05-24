@@ -32,7 +32,8 @@ elif appl == '2016Base_4OTC2':
 
 # Create a CMAQModel object
 cmaq_sim = CMAQModel(start_datetime, end_datetime, appl, coord_name, grid_name, 
-    setup_yaml=f'dirpaths_{appl}.yml', new_bcon=True, bcon_vrsn='v532', bcon_type='regrid', verbose=True)
+                     setup_yaml=f'dirpaths_{appl}.yml', new_bcon=True, bcon_vrsn='v54', 
+                     bcon_type='regrid', verbose=True)
 
 # Call the "run_bcon" method
 cmaq_sim.run_bcon_multiday(coarse_grid_appl=crs_grid_appl, run_hours=2, setup_only=False)

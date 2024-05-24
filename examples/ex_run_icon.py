@@ -15,8 +15,8 @@ end_datetime = 'August 14, 2016'  # last day you want run
 # Specify if you want to run the 12 km or the 4 km domain
 # appl = '2016_12OTC2'
 # appl = '2016Base_12OTC2'
-appl = '2016_4OTC2'
-# appl = '2016Base_4OTC2'
+# appl = '2016_4OTC2'
+appl = '2016Base_4OTC2'
 
 # Specify if you want to run or just setup cctm
 setup_only = False
@@ -32,9 +32,16 @@ elif appl == '2016_4OTC2':
 elif appl == '2016Base_4OTC2':
     grid_name = '4OTC2'
 
+# Specify the coarse grid application name
+if appl == '2016_4OTC2':
+    crs_grid_appl = '2016_12OTC2' 
+elif appl == '2016Base_4OTC2':
+    crs_grid_appl = '2016Base_12OTC2'
+
 # Create a CMAQModel object
 cmaq_sim = CMAQModel(start_datetime, end_datetime, appl, coord_name, grid_name, 
-    setup_yaml=f'dirpaths_{appl}.yml', new_mcip=True, verbose=True)
+                     setup_yaml=f'dirpaths_{appl}.yml', new_mcip=True, icon_vrsn='v54',
+                     icon_type='regrid', verbose=True)
 
 # Call the "run_icon" method
-cmaq_sim.run_icon(type='regrid', coarse_grid_appl='12OTC4', run_hours=2, setup_only=False)
+cmaq_sim.run_icon_multiday(coarse_grid_appl=crs_grid_appl, run_hours=2, setup_only=False)
