@@ -661,7 +661,7 @@ class CMAQModel:
 
         # Link gridded emissions to $INPDIR/emis/gridded_area
         utils.make_dirs(self.CCTM_GRIDDED)
-        for ii in range(n_emis_gr + 1):
+        for ii in range(1, n_emis_gr + 1):
             # Get the name of the directory where theis gridded sector is stored
             gr_emis_dir = self.dirpaths.get(f'LOC_GR_EMIS_{str(ii).zfill(3)}')
             if self.verbose:
@@ -676,7 +676,7 @@ class CMAQModel:
         # Link point source emissions to $INPDIR/emis/inln_point 
         # and the associated stack groups to $INPDIR/emis/inln_point/stack_groups
         utils.make_dirs(f'{self.CCTM_PT}/stack_groups')
-        for ii in range(n_emis_pt + 1):
+        for ii in range(1, n_emis_pt + 1):
             if self.verbose:
                 print(f'Linking the {pt_emis_labs[ii - 1]} sector emissions')
             for date in start_datetimes_lst:
