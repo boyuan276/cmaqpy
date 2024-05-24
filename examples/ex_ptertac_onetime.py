@@ -32,7 +32,7 @@ smoke_sim = SMOKEModel(appl,
                        grid_name, 
                        sector='ptertac', 
                        run_months=[8], 
-                       ertac_case='CONUS2016_S0', # CONUS2016_Base (base case) or CONUS2016_S0 (w/ renewable)
+                       ertac_case='CONUS2016_Base', # CONUS2016_Base (base case) or CONUS2016_S0 (w/ renewable)
                        emisinv_b='2016fh_proj_from_egunoncems_2016version1_ERTAC_Platform_POINT_calcyear2014_27oct2019.csv', 
                        emisinv_c='egunoncems_2016version1_ERTAC_Platform_POINT_27oct2019.csv', 
                        setup_yaml=f'dirpaths_{appl}.yml', 
