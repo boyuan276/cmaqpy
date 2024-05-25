@@ -63,7 +63,7 @@ elif grid_name == '4OTC2':
     # Create a CMAQModel object
     cmaq_sim = CMAQModel(start_datetime, end_datetime,
                          appl, coord_name, grid_name,
-                         chem_mech='cb6r3_ae7_aq',
+                         chem_mech='cb6r5_ae7_aq',
                          cctm_vrsn='v54',
                          setup_yaml=f'dirpaths_{appl}.yml',
                          compiler='gcc',
