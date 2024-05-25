@@ -329,7 +329,7 @@ class CMAQModel:
             mcip_start_datetime = self.start_datetime + datetime.timedelta(day_no)
             mcip_end_datetime = self.start_datetime + datetime.timedelta(day_no + 1)
             if self.verbose:
-                print(f'--> Working on MCIP for {mcip_start_datetime}')
+                print(f'--> Working on MCIP for {mcip_start_datetime.strftime("%Y-%m-%d")}')
             if metfile_dir is None:
                 # If all the met data is stored in the same file, pass that file in 
                 # using metfile_list and set metfile_dir=None
@@ -490,12 +490,13 @@ class CMAQModel:
             Option to setup the directories and write the scripts without running BCON.
         """
         # Loop over each day
-        for day_no in range(self.delt.days):
+        # NOTE: Include the last day in the loop because the end date is exclusive
+        for day_no in range(self.delt.days + 1):
             # Set the start datetime and end datetime for the day
             icon_start_datetime = self.start_datetime + datetime.timedelta(day_no)
             icon_end_datetime = self.start_datetime + datetime.timedelta(day_no + 1)
             if self.verbose:
-                print(f'--> Working on ICON for {icon_start_datetime}')
+                print(f'--> Working on ICON for {icon_start_datetime.strftime("%Y-%m-%d")}')
 
             # run bcon for that day
             self.run_icon(icon_start_datetime=icon_start_datetime, icon_end_datetime=icon_end_datetime,
@@ -652,12 +653,13 @@ class CMAQModel:
             Option to setup the directories and write the scripts without running BCON.
         """
         # Loop over each day
-        for day_no in range(self.delt.days):
+        # NOTE: Include the last day in the loop because the end date is exclusive
+        for day_no in range(self.delt.days + 1):
             # Set the start datetime and end datetime for the day
             bcon_start_datetime = self.start_datetime + datetime.timedelta(day_no)
             bcon_end_datetime = self.start_datetime + datetime.timedelta(day_no + 1)
             if self.verbose:
-                print(f'--> Working on BCON for {bcon_start_datetime}')
+                print(f'--> Working on BCON for {bcon_start_datetime.strftime("%Y-%m-%d")}')
 
             # run bcon for that day
             self.run_bcon(bcon_start_datetime=bcon_start_datetime, bcon_end_datetime=bcon_end_datetime,
