@@ -9,8 +9,11 @@ import pandas as pd
 import wrf as wrfpy
 import xarray as xr
 
+from typing import List, Tuple, Dict, Union
 
-def get_proj(ds):
+
+def get_proj(ds: xr.Dataset
+             ) -> ccrs.CRS:
     """
     Extracts information about the CMAQ grid projection from the proj4_srs attribute
     in an output file dataset.
@@ -36,10 +39,13 @@ def get_proj(ds):
                                             standard_parallels=[truelat1, truelat2])
         return cartopy_crs
     else:
-        raise ValueError('Your projection is not the expected Lambert Conformal.')
+        raise ValueError(
+            'Your projection is not the expected Lambert Conformal.')
 
 
-def get_domain_boundary(ds, cartopy_crs):
+def get_domain_boundary(ds: xr.Dataset,
+                        cartopy_crs: ccrs.CRS
+                        ) -> np.ndarray:
     """
     Finds the boundary of the CMAQ or WRF domain.
 
@@ -52,7 +58,7 @@ def get_domain_boundary(ds, cartopy_crs):
         either named "longitude" or "XLONG."
     :param cartopy_crs: `cartopy.crs.CRS`
         Cartopy coordinate reference system.
-    :return projected_bounds: list
+    :return projected_bounds: np.ndarray
         Bounds of the domain transformed into the specified coordinate reference
         system.
     """
@@ -63,7 +69,7 @@ def get_domain_boundary(ds, cartopy_crs):
         ds = xr.Dataset.rename(ds, variables)
     except ValueError:
         print(f'Variables {variables} cannot be renamed, '
-                f'those on the left are not in this dataset.')
+              f'those on the left are not in this dataset.')
 
     # I need to manually convert the boundaries of the WRF domain into Plate Carree to set the limits.
     # Get the raw map bounds using a wrf-python utility
@@ -71,13 +77,23 @@ def get_domain_boundary(ds, cartopy_crs):
 
     # Get the projected bounds telling cartopy that the input coordinates are lat/lon (Plate Carree)
     projected_bounds = cartopy_crs.transform_points(ccrs.PlateCarree(),
-                                                    np.array([raw_bounds.bottom_left.lon, raw_bounds.top_right.lon]),
+                                                    np.array(
+                                                        [raw_bounds.bottom_left.lon, raw_bounds.top_right.lon]),
                                                     np.array([raw_bounds.bottom_left.lat, raw_bounds.top_right.lat]))
     return projected_bounds
 
 
-def conc_map(plot_var, cmap=cm.get_cmap('bwr'), figsize=(8,8), ax=None, cartopy_crs=None, proj_bounds=None,
-    vmin=-1, vmax=1, cbar_args={}, savefig=False, figpath='conc_map.png'):
+def conc_map(plot_var: xr.DataArray,
+             cmap=cm.get_cmap('bwr'),
+             figsize=(8, 8),
+             ax=None,
+             cartopy_crs=None,
+             proj_bounds=None,
+             vmin=-1,
+             vmax=1,
+             cbar_args={},
+             savefig=False,
+             figpath='conc_map.png'):
     """
     Creates a filled colormap across the full domain in the native (Lambert
     Conformal) map projection.
@@ -120,9 +136,11 @@ def conc_map(plot_var, cmap=cm.get_cmap('bwr'), figsize=(8,8), ax=None, cartopy_
     # Normalize the values, so that the colorbar plots correctly
     norm = colors.Normalize(vmin=vmin, vmax=vmax)
 
-    # Create the pcolormesh 
-    cn = ax.pcolormesh(wrfpy.to_np(plot_var.longitude), wrfpy.to_np(plot_var.latitude), wrfpy.to_np(plot_var),
-                       transform=ccrs.PlateCarree(), 
+    # Create the pcolormesh
+    cn = ax.pcolormesh(wrfpy.to_np(plot_var.longitude),
+                       wrfpy.to_np(plot_var.latitude),
+                       wrfpy.to_np(plot_var),
+                       transform=ccrs.PlateCarree(),
                        cmap=cmap,
                        norm=norm,
                        )
@@ -138,16 +156,16 @@ def conc_map(plot_var, cmap=cm.get_cmap('bwr'), figsize=(8,8), ax=None, cartopy_
     # Download and add the states, coastlines, and lakes
     shapename = 'admin_1_states_provinces_lakes'
     states_shp = shpreader.natural_earth(resolution='10m',
-                                        category='cultural', 
-                                        name=shapename)
+                                         category='cultural',
+                                         name=shapename)
     # Add features to the maps
     ax.add_geometries(
         shpreader.Reader(states_shp).geometries(),
         ccrs.PlateCarree(),
         facecolor='none',
-        linewidth=.5, 
+        linewidth=.5,
         edgecolor="black"
-        )
+    )
 
     # Add features to the maps
     # ax.add_feature(cfeature.LAKES)
@@ -176,9 +194,16 @@ def conc_map(plot_var, cmap=cm.get_cmap('bwr'), figsize=(8,8), ax=None, cartopy_
         plt.savefig(figpath, dpi=300, transparent=True, bbox_inches='tight')
 
 
-def pollution_plot(da, vmin=0, vmax=12, cmap=cm.get_cmap('YlOrBr'),
-                   extent=None, cbar_label='PM$_{2.5}$ ($\mu g/m^{3}$)', figsize=(15,7),
-                   titlestr='Title', savefig=False, figpath='./pollution_plot.png'):
+def pollution_plot(da,
+                   vmin=0,
+                   vmax=12,
+                   cmap=cm.get_cmap('YlOrBr'),
+                   extent=None,
+                   cbar_label='PM$_{2.5}$ ($\mu g/m^{3}$)',
+                   figsize=(15, 7),
+                   titlestr='Title',
+                   savefig=False,
+                   figpath='./pollution_plot.png'):
     """
     Creates a filled colormap using the Plate Carree projectsion across a 
     user-defined section of the domain (defaults to the full domain) using 
@@ -210,11 +235,13 @@ def pollution_plot(da, vmin=0, vmax=12, cmap=cm.get_cmap('YlOrBr'),
         the output figure's name and type.
     """
     if extent is None:
-        extent = [da.longitude.min(), da.longitude.max(), da.latitude.min(), da.latitude.max() - 2]
-    ax = m.plots.draw_map(states=True, resolution='10m',  linewidth=0.5, figsize=figsize, extent=extent, subplot_kw={'projection': ccrs.PlateCarree()})
-    p = da.plot(x='longitude', y='latitude', ax=ax, robust=True, 
+        extent = [da.longitude.min(), da.longitude.max(),
+                  da.latitude.min(), da.latitude.max() - 2]
+    ax = m.plots.draw_map(states=True, resolution='10m',  linewidth=0.5, figsize=figsize,
+                          extent=extent, subplot_kw={'projection': ccrs.PlateCarree()})
+    p = da.plot(x='longitude', y='latitude', ax=ax, robust=True,
                 vmin=vmin, vmax=vmax, cmap=cmap,
-                cbar_kwargs={'label': cbar_label, 
+                cbar_kwargs={'label': cbar_label,
                              'extend': 'neither'},
                 )
     if titlestr is not None:
@@ -225,11 +252,23 @@ def pollution_plot(da, vmin=0, vmax=12, cmap=cm.get_cmap('YlOrBr'),
         plt.show()
 
 
-def conc_compare(da1, da2, extent=None,
-                 vmin1=0, vmax1=10, vmin2=-1, vmax2=1, cmap1=cm.get_cmap('YlOrBr'), cmap2=cm.get_cmap('bwr'),
-                 cbar_label1='PM$_{2.5}$ ($\mu g/m^{3}$)', cbar_label2='PM$_{2.5}$ Difference (%)',
-                 titlestr1=None, titlestr2=None,
-                 figsize=(15,7), savefig=False, figpath1='./conc_compare1.png', figpath2='./conc_compare2.png'):
+def conc_compare(da1: xr.DataArray,
+                 da2: xr.DataArray,
+                 extent=None,
+                 vmin1=0,
+                 vmax1=10,
+                 vmin2=-1,
+                 vmax2=1,
+                 cmap1=cm.get_cmap('YlOrBr'),
+                 cmap2=cm.get_cmap('bwr'),
+                 cbar_label1='PM$_{2.5}$ ($\mu g/m^{3}$)',
+                 cbar_label2='PM$_{2.5}$ Difference (%)',
+                 titlestr1=None,
+                 titlestr2=None,
+                 figsize=(15, 7),
+                 savefig=False,
+                 figpath1='./conc_compare1.png',
+                 figpath2='./conc_compare2.png'):
     """
     Creates two filled colormaps for concentration comparisons.
 
@@ -276,18 +315,21 @@ def conc_compare(da1, da2, extent=None,
     """
     # f, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=fsize)
     if extent is None:
-        extent = [da1.longitude.min(), da1.longitude.max(), da1.latitude.min(), da1.latitude.max() - 2]
-    f1, ax1 = m.plots.draw_map(states=True, resolution='10m', figsize=figsize,  linewidth=0.5, extent=extent, subplot_kw={'projection': ccrs.PlateCarree()}, return_fig=True)
-    f2, ax2 = m.plots.draw_map(states=True, resolution='10m', figsize=figsize,  linewidth=0.5,  extent=extent, subplot_kw={'projection': ccrs.PlateCarree()}, return_fig=True)
+        extent = [da1.longitude.min(), da1.longitude.max(),
+                  da1.latitude.min(), da1.latitude.max() - 2]
+    f1, ax1 = m.plots.draw_map(states=True, resolution='10m', figsize=figsize,  linewidth=0.5,
+                               extent=extent, subplot_kw={'projection': ccrs.PlateCarree()}, return_fig=True)
+    f2, ax2 = m.plots.draw_map(states=True, resolution='10m', figsize=figsize,  linewidth=0.5,
+                               extent=extent, subplot_kw={'projection': ccrs.PlateCarree()}, return_fig=True)
     # f.axes.append(ax2)
-    da1.plot(x='longitude', y='latitude', ax=ax1, robust=True, 
-            vmin=vmin1, vmax=vmax1, cmap=cmap1,
-            cbar_kwargs={'label': cbar_label1, 'extend': 'neither'},
-            )
-    da2.plot(x='longitude', y='latitude', ax=ax2, robust=True, 
-            vmin=vmin2, vmax=vmax2, cmap=cmap2,
-            cbar_kwargs={'label': cbar_label2, 'extend': 'neither'},
-            )
+    da1.plot(x='longitude', y='latitude', ax=ax1, robust=True,
+             vmin=vmin1, vmax=vmax1, cmap=cmap1,
+             cbar_kwargs={'label': cbar_label1, 'extend': 'neither'},
+             )
+    da2.plot(x='longitude', y='latitude', ax=ax2, robust=True,
+             vmin=vmin2, vmax=vmax2, cmap=cmap2,
+             cbar_kwargs={'label': cbar_label2, 'extend': 'neither'},
+             )
 
     if titlestr1 is not None:
         ax1.set_title(titlestr1)
@@ -301,10 +343,19 @@ def conc_compare(da1, da2, extent=None,
         f2.show()
 
 
-def prof_change(gen_idx, gen_df1, gen_df2, date=None, column_names=['Base Case', 'w/ Renewables'],
-               figsize=(7,3), colors=['purple','orange'], linewidth=2, linestyles=['-','-.'], 
-               titlestr1='', ylabelstr='Power (MW)', 
-               savefig=False, outfile_pfix='../cmaqpy/data/plots/gen_profs_'):
+def prof_change(gen_idx,
+                gen_df1,
+                gen_df2,
+                date=None,
+                column_names=['Base Case', 'w/ Renewables'],
+                figsize=(7, 3),
+                colors=['purple', 'orange'],
+                linewidth=2,
+                linestyles=['-', '-.'],
+                titlestr1='',
+                ylabelstr='Power (MW)',
+                savefig=False,
+                outfile_pfix='../cmaqpy/data/plots/gen_profs_'):
     """
     Plots changes in generation or emissions profiles for a user-specified unit.
 
@@ -341,29 +392,43 @@ def prof_change(gen_idx, gen_df1, gen_df2, date=None, column_names=['Base Case',
         the output figure's name. The generator name will be appended.   
     """
     if date is None:
-        change_df1 = pd.concat([gen_df1.iloc[gen_idx,5:], gen_df2.iloc[gen_idx,5:]], axis=1)
+        change_df1 = pd.concat(
+            [gen_df1.iloc[gen_idx, 5:], gen_df2.iloc[gen_idx, 5:]], axis=1)
     else:
-        change_df1 = pd.concat([gen_df1.loc[gen_idx,pd.Timestamp(f'{date} 00'):pd.Timestamp(f'{date} 23')], gen_df2.loc[gen_idx,pd.Timestamp(f'{date} 00'):pd.Timestamp(f'{date} 23')]], axis=1)
+        change_df1 = pd.concat([gen_df1.loc[gen_idx, pd.Timestamp(f'{date} 00'):pd.Timestamp(
+            f'{date} 23')], gen_df2.loc[gen_idx, pd.Timestamp(f'{date} 00'):pd.Timestamp(f'{date} 23')]], axis=1)
     change_df1.columns = column_names
 
     f = plt.figure(figsize=figsize)
     ax1 = f.gca()
-    change_df1.plot(color=colors, linewidth=linewidth, style=linestyles, ax=ax1)
+    change_df1.plot(color=colors, linewidth=linewidth,
+                    style=linestyles, ax=ax1)
 
     ax1.legend(loc='lower center', bbox_to_anchor=(0.5, -0.5), ncol=2)
     ax1.set_title(f'{gen_df1["NYISO Name"][gen_idx]} {titlestr1}')
     ax1.set_ylabel(ylabelstr)
     if savefig:
-        plt.savefig(f'{outfile_pfix}{gen_df1["NYISO Name"][gen_idx]}.png', dpi=300, transparent=True, bbox_inches='tight')
+        plt.savefig(f'{outfile_pfix}{gen_df1["NYISO Name"][gen_idx]}.png',
+                    dpi=300, transparent=True, bbox_inches='tight')
     else:
         plt.show()
 
 
-def prof_compare(gen_idx1, gen_idx2, gen_df1, gen_df2, date=None, column_names=['Base Case', 'w/ Renewables'],
-               figsize=(7,7), colors=['purple','orange'], linewidth=2, linestyles=['-','-.'], 
-               titlestr1='(baseload/load following)', titlestr2='(peaking)', ylabelstr='Power (MW)', 
-               savefig=False, outfile_pfix='../cmaqpy/data/plots/gen_profs_'):
-
+def prof_compare(gen_idx1,
+                 gen_idx2,
+                 gen_df1,
+                 gen_df2,
+                 date=None,
+                 column_names=['Base Case', 'w/ Renewables'],
+                 figsize=(7, 7), 
+                 colors=['purple', 'orange'], 
+                 linewidth=2, 
+                 linestyles=['-', '-.'],
+                 titlestr1='(baseload/load following)', 
+                 titlestr2='(peaking)', 
+                 ylabelstr='Power (MW)',
+                 savefig=False, 
+                 outfile_pfix='../cmaqpy/data/plots/gen_profs_'):
     """
     Compares changes in generation or emissions for two user-specified units.
 
@@ -404,19 +469,25 @@ def prof_compare(gen_idx1, gen_idx2, gen_df1, gen_df2, date=None, column_names=[
         the output figure's name. The generator name will be appended.
     """
     if date is None:
-        change_df1 = pd.concat([gen_df1.iloc[gen_idx1,5:], gen_df2.iloc[gen_idx1,5:]], axis=1)
+        change_df1 = pd.concat(
+            [gen_df1.iloc[gen_idx1, 5:], gen_df2.iloc[gen_idx1, 5:]], axis=1)
     else:
-        change_df1 = pd.concat([gen_df1.loc[gen_idx1,pd.Timestamp(f'{date} 00'):pd.Timestamp(f'{date} 23')], gen_df2.loc[gen_idx1,pd.Timestamp(f'{date} 00'):pd.Timestamp(f'{date} 23')]], axis=1)
+        change_df1 = pd.concat([gen_df1.loc[gen_idx1, pd.Timestamp(f'{date} 00'):pd.Timestamp(
+            f'{date} 23')], gen_df2.loc[gen_idx1, pd.Timestamp(f'{date} 00'):pd.Timestamp(f'{date} 23')]], axis=1)
     change_df1.columns = column_names
     if date is None:
-        change_df2 = pd.concat([gen_df1.iloc[gen_idx2,5:], gen_df2.iloc[gen_idx2,5:]], axis=1)
+        change_df2 = pd.concat(
+            [gen_df1.iloc[gen_idx2, 5:], gen_df2.iloc[gen_idx2, 5:]], axis=1)
     else:
-        change_df2 = pd.concat([gen_df1.loc[gen_idx2,pd.Timestamp(f'{date} 00'):pd.Timestamp(f'{date} 23')], gen_df2.loc[gen_idx2,pd.Timestamp(f'{date} 00'):pd.Timestamp(f'{date} 23')]], axis=1)
+        change_df2 = pd.concat([gen_df1.loc[gen_idx2, pd.Timestamp(f'{date} 00'):pd.Timestamp(
+            f'{date} 23')], gen_df2.loc[gen_idx2, pd.Timestamp(f'{date} 00'):pd.Timestamp(f'{date} 23')]], axis=1)
     change_df2.columns = column_names
 
     _, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, sharex=True, figsize=figsize)
-    change_df1.plot(color=colors, linewidth=linewidth, style=linestyles, ax=ax1)
-    change_df2.plot(color=colors, linewidth=linewidth, style=linestyles, ax=ax2)
+    change_df1.plot(color=colors, linewidth=linewidth,
+                    style=linestyles, ax=ax1)
+    change_df2.plot(color=colors, linewidth=linewidth,
+                    style=linestyles, ax=ax2)
 
     ax1.get_legend().remove()
     ax2.legend(loc='lower center', bbox_to_anchor=(0.5, -0.5), ncol=2)
@@ -425,6 +496,7 @@ def prof_compare(gen_idx1, gen_idx2, gen_df1, gen_df2, date=None, column_names=[
     ax1.set_ylabel(ylabelstr)
     ax2.set_ylabel(ylabelstr)
     if savefig:
-        plt.savefig(f'{outfile_pfix}{gen_df1["NYISO Name"][gen_idx1]}_{gen_df1["NYISO Name"][gen_idx2]}.png', dpi=300, transparent=True, bbox_inches='tight')
+        plt.savefig(f'{outfile_pfix}{gen_df1["NYISO Name"][gen_idx1]}_{gen_df1["NYISO Name"][gen_idx2]}.png',
+                    dpi=300, transparent=True, bbox_inches='tight')
     else:
         plt.show()
