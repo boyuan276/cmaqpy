@@ -929,8 +929,10 @@ class CMAQModel:
             cctm_proc = '@ NPCOL  =  4; @ NPROW =  8'
         elif n_procs == 48:
             cctm_proc = '@ NPCOL  =  6; @ NPROW =  8'
+        elif n_procs == 64:
+            cctm_proc = '@ NPCOL  =  8; @ NPROW =  8'
         else:
-            print(f'No {n_procs} processor setup has been specified. Use [8, 12, 16, 24, 32, or 48].')
+            print(f'No {n_procs} processor setup has been specified. Use [8, 12, 16, 24, 32, 48 or 64].')
             raise ValueError
         utils.write_to_template(run_cctm_path, cctm_proc, id='%PROC%')
 
