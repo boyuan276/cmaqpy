@@ -11,8 +11,8 @@ start_datetime = 'August 06, 2016'  # first day that you want run
 end_datetime = 'August 14, 2016'  # DAY AFTER the last day you want run
 
 # Specify if you want to run the 12 km or the 4 km domain
-# appl = '2016_12OTC2'
-appl = '2016Base_12OTC2'
+appl = '2016_12OTC2'
+# appl = '2016Base_12OTC2'
 # appl = '2016_4OTC2'
 # appl = '2016Base_4OTC2'
 
@@ -57,7 +57,7 @@ if grid_name == '12OTC2':
                       stkcasee='12US1_cmaq_cb6_2016fh_16j',
                       delete_existing_output='TRUE', 
                       new_sim='FALSE', tstep='010000',
-                      cctm_hours=24, n_procs=48, gb_mem=50, 
+                      cctm_hours=24, n_procs=64, gb_mem=50, 
                       run_hours=72, setup_only=False)
 elif grid_name == '4OTC2':
     # Create a CMAQModel object
