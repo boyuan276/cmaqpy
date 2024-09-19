@@ -95,14 +95,11 @@ setenv CTM_ADV_CFL 0.95      #> max CFL [ default: 0.75]
 #> Science Options
 setenv CTM_OCEAN_CHEM N      #> Flag for ocean halgoen chemistry and sea spray aerosol emissions [ default: Y ]
 setenv CTM_WB_DUST N         #> use inline windblown dust emissions [ default: Y ]
-setenv CTM_WBDUST_BELD BELD3 #> landuse database for identifying dust source regions 
+# setenv CTM_WBDUST_BELD BELD3 #> landuse database for identifying dust source regions 
                              #>    [ default: UNKNOWN ]; ignore if CTM_WB_DUST = N 
 setenv CTM_LTNG_NO N         #> turn on lightning NOx [ default: N ]
 setenv KZMIN Y               #> use Min Kz option in edyintb [ default: Y ], 
                              #>    otherwise revert to Kz0UT
-setenv CTM_MOSAIC N          #> landuse specific deposition velocities [ default: N ]
-setenv CTM_FST N             #> mosaic method to get land-use specific stomatal flux 
-                             #>    [ default: N ]
 setenv PX_VERSION Y          #> WRF PX LSM
 setenv CLM_VERSION N         #> WRF CLM LSM
 setenv NOAH_VERSION N        #> WRF NOAH LSM
@@ -115,7 +112,26 @@ setenv CTM_SFC_HONO Y        #> surface HONO interaction [ default: Y ]
                              #> please see user guide (6.10.4 Nitrous Acid (HONO)) 
                              #> for dependency on percent urban fraction dataset
 setenv CTM_GRAV_SETL Y       #> vdiff aerosol gravitational sedimentation [ default: Y ]
-setenv CTM_BIOGEMIS N        #> calculate in-line biogenic emissions [ default: N ]
+# setenv CTM_BIOGEMIS N        #> calculate in-line biogenic emissions [ default: N ]
+setenv CTM_BIOGEMIS_BE N     #> calculate in-line biogenic emissions with BEIS [ default: N ]
+setenv CTM_BIOGEMIS_MG N     #> turns on MEGAN biogenic emission [ default: N ]
+setenv BDSNP_MEGAN N         #> turns on BDSNP soil NO emissions [ default: N ]
+
+setenv IC_AERO_M2WET F       #> Specify whether or not initial condition aerosol size distribution 
+                             #>    is wet or dry [ default: F = dry ]
+setenv BC_AERO_M2WET F       #> Specify whether or not boundary condition aerosol size distribution 
+                             #>    is wet or dry [ default: F = dry ]
+setenv IC_AERO_M2USE F       #> Specify whether or not to use aerosol surface area from initial 
+                             #>    conditions [ default: T = use aerosol surface area  ]
+setenv BC_AERO_M2USE F       #> Specify whether or not to use aerosol surface area from boundary 
+                             #>    conditions [ default: T = use aerosol surface area  ]
+
+setenv CTM_MOSAIC N          #> landuse specific deposition velocities [ default: N ]
+# setenv CTM_FST N             #> mosaic method to get land-use specific stomatal flux 
+                             #>    [ default: N ]
+setenv CTM_STAGE_P22 N       #> Pleim et al. 2022 Aerosol deposition model [default: N]
+setenv CTM_STAGE_E20 Y       #> Emerson et al. 2020 Aerosol deposition model [default: Y]
+setenv CTM_STAGE_S22 N       #> Shu et al. 2022 (CMAQ v5.3) Aerosol deposition model [default: N]
 
 #> Vertical Extraction Options
 setenv VERTEXT N
@@ -128,7 +144,7 @@ setenv PROMPTFLAG F          #> turn on I/O-API PROMPT*FILE interactive mode [ o
 setenv IOAPI_OFFSET_64 YES   #> support large timestep records (>2GB/timestep record) [ options: YES | NO ]
 setenv IOAPI_CHECK_HEADERS N #> check file headers [ options: Y | N ]
 setenv CTM_EMISCHK N         #> Abort CMAQ if missing surrogates from emissions Input files
-setenv EMISDIAG F            #> Print Emission Rates at the output time step after they have been
+# setenv EMISDIAG F            #> Print Emission Rates at the output time step after they have been
                              #>   scaled and modified by the user Rules [options: F | T or 2D | 3D | 2DSUM ]
                              #>   Individual streams can be modified using the variables:
                              #>       GR_EMIS_DIAG_## | STK_EMIS_DIAG_## | BIOG_EMIS_DIAG
@@ -136,7 +152,7 @@ setenv EMISDIAG F            #> Print Emission Rates at the output time step aft
                              #>       SEASPRAY_EMIS_DIAG   
                              #>   Note that these diagnostics are different than other emissions diagnostic
                              #>   output because they occur after scaling.
-setenv EMISDIAG_SUM F        #> Print Sum of Emission Rates to Gridded Diagnostic File
+# setenv EMISDIAG_SUM F        #> Print Sum of Emission Rates to Gridded Diagnostic File
 
 #> Diagnostic Output Flags
 setenv CTM_CKSUM Y           #> checksum report [ default: Y ]
@@ -187,7 +203,9 @@ while ($TODAYJ <= $STOP_DAY )  #>Compare dates in terms of YYYYJJJ
    #> Retrieve Calendar day Information
    set YYYYMMDD = `date -ud "${TODAYG}" +%Y%m%d` #> Convert YYYY-MM-DD to YYYYMMDD
    set YYYYMM = `date -ud "${TODAYG}" +%Y%m`     #> Convert YYYY-MM-DD to YYYYMM
+   set YYYY = `date -ud "${TODAYG}" +%Y`         #> Convert YYYY-MM-DD to YYYY
    set YYMMDD = `date -ud "${TODAYG}" +%y%m%d`   #> Convert YYYY-MM-DD to YYMMDD
+   set MM = `date -ud "${TODAYG}" +%m`           #> Convert YYYY-MM-DD to MM
    set DD = `date -ud "${TODAYG}" +%d`           #> Get only the day
    set YYYYJJJ = $TODAYJ
 
@@ -203,10 +221,13 @@ while ($TODAYJ <= $STOP_DAY )  #>Compare dates in terms of YYYYJJJ
    # Emission Rates for Inline Point Sources
    #--> Create a link for representative date emissions sectors: othpt, ptnonipm, pt_oilgas 
    #--> NOTE: this is the how NEI processes emissions, so you need the sectorlist file from one of the NEI platforms
-   set sectorlist = $IN_PTpath/../sectorlist_2016fh_02aug2019_v0
-   set reffile = $IN_PTpath/../smk_merge_dates_${YYYYMM}.txt
+   # set sectorlist = $IN_PTpath/../sectorlist_2016fh_02aug2019_v0
+   # set reffile = $IN_PTpath/../smk_merge_dates_${YYYYMM}.txt
 
-   set intable = `head -$gline $reffile | tail -1`
+   #> Determine Representative Emission Days
+   set EMDATES = $INPDIR/emis/smk_merge_dates_${YYYYMM}.txt
+   set intable = `grep "^${YYYYMMDD}" $EMDATES`
+   # set intable = `head -$gline $reffile | tail -1`
    set Date     = `echo $intable[1] | cut -d, -f1`
    set aveday_N = `echo $intable[2] | cut -d, -f1`
    set aveday_Y = `echo $intable[3] | cut -d, -f1`
@@ -250,15 +271,15 @@ while ($TODAYJ <= $STOP_DAY )  #>Compare dates in terms of YYYYJJJ
    set OPTfile = PHOT_OPTICS.dat
 
    #> MCIP meteorology files 
-   setenv GRID_BDY_2D $METpath/GRIDBDY2D_${YYMMDD}.nc  # GRID files are static, not day-specific
-   setenv GRID_CRO_2D $METpath/GRIDCRO2D_${YYMMDD}.nc
-   setenv GRID_CRO_3D $METpath/GRIDCRO3D_${YYMMDD}.nc
-   setenv GRID_DOT_2D $METpath/GRIDDOT2D_${YYMMDD}.nc
-   setenv MET_CRO_2D $METpath/METCRO2D_${YYMMDD}.nc
-   setenv MET_CRO_3D $METpath/METCRO3D_${YYMMDD}.nc
-   setenv MET_DOT_3D $METpath/METDOT3D_${YYMMDD}.nc
-   setenv MET_BDY_3D $METpath/METBDY3D_${YYMMDD}.nc
-   setenv LUFRAC_CRO $METpath/LUFRAC_CRO_${YYMMDD}.nc
+   setenv GRID_BDY_2D $METpath/GRIDBDY2D_${YYYYMMDD}.nc  # GRID files are static, not day-specific
+   setenv GRID_CRO_2D $METpath/GRIDCRO2D_${YYYYMMDD}.nc
+   setenv GRID_CRO_3D $METpath/GRIDCRO3D_${YYYYMMDD}.nc
+   setenv GRID_DOT_2D $METpath/GRIDDOT2D_${YYYYMMDD}.nc
+   setenv MET_CRO_2D $METpath/METCRO2D_${YYYYMMDD}.nc
+   setenv MET_CRO_3D $METpath/METCRO3D_${YYYYMMDD}.nc
+   setenv MET_DOT_3D $METpath/METDOT3D_${YYYYMMDD}.nc
+   setenv MET_BDY_3D $METpath/METBDY3D_${YYYYMMDD}.nc
+   setenv LUFRAC_CRO $METpath/LUFRAC_CRO_${YYYYMMDD}.nc
 
    #> Emissions Control File
    #>
@@ -286,8 +307,13 @@ while ($TODAYJ <= $STOP_DAY )  #>Compare dates in terms of YYYYJJJ
    #> family output.
    setenv MISC_CTRL_NML ${BLD}/CMAQ_Control_Misc.nml  # NOTE: Added for CMAQv54
 
+   #> The following namelist controls the mapping of meteorological land use types and the NH3 and Hg emission
+   #> potentials
+   setenv STAGECTRL_NML ${BLD}/CMAQ_Control_STAGE.nml
+
    #> Spatial Masks For Emissions Scaling
-   setenv CMAQ_MASKS $SZpath/12US1_surf.12otc2.ncf #> horizontal grid-dependent surf zone file
+   setenv CMAQ_MASKS $SZpath/12US1_surf.ncf #> horizontal grid-dependent surf zone file
+   # setenv CMAQ_MASKS $SZpath/OCEAN_${MM}_L3m_MC_CHL_chlor_a_12US1.ncf3 #> horizontal grid-dependent surf zone file
 
 %GRIDDED%
 
@@ -300,40 +326,52 @@ while ($TODAYJ <= $STOP_DAY )  #>Compare dates in terms of YYYYJJJ
    #> In-line lightning NOx options
       setenv USE_NLDN  Y        #> use hourly NLDN strike file [ default: Y ]
       if ( $USE_NLDN == Y ) then
-         setenv NLDN_STRIKES ${IN_LTpath}/NLDN.12US1.${YYYYMMDD}_bench.nc
+         setenv NLDN_STRIKES ${IN_LTpath}/NLDN_12km_60min_${YYYYMMDD}.ioapi
       endif
-      setenv LTNGPARMS_FILE ${IN_LTpath}/LTNG_AllParms_12US1_bench.nc #> lightning parameter file
+      setenv LTNGPARMS_FILE ${IN_LTpath}/LTNG_AllParms_12US1.ncf #> lightning parameter file; ignore if LTNGPARAM = N
    endif
 
    #> In-line biogenic emissions configuration
-   if ( $CTM_BIOGEMIS == 'Y' ) then   
-      set IN_BEISpath = ${INPDIR}/land
-      setenv GSPRO      $BLD/gspro_biogenics.txt
-      setenv B3GRD      $IN_BEISpath/b3grd_bench.nc
-      setenv BIOSW_YN   Y     #> use frost date switch [ default: Y ]
-      setenv BIOSEASON  $IN_BEISpath/bioseason.cmaq.2016_12US1_full_bench.ncf 
-                              #> ignore season switch file if BIOSW_YN = N
-      setenv SUMMER_YN  Y     #> Use summer normalized emissions? [ default: Y ]
-      setenv PX_VERSION Y     #> MCIP is PX version? [ default: N ]
-      setenv SOILINP    $OUTDIR/CCTM_SOILOUT_${RUNID}_${YESTERDAY}.nc
+   if ( $CTM_BIOGEMIS_MG == 'Y' ) then
+      setenv MEGAN_SOILINP    $OUTDIR/CCTM_MSOILOUT_${RUNID}_${YESTERDAY}.nc
+                              #> Biogenic NO soil input file; ignore if INITIAL_RUN = Y
+                              #>                            ; ignore if IGNORE_SOILINP = Y
+            setenv MEGAN_CTS /work/MOD3DATA/2016_12US1/surface/megan3.2/CT3_CONUS.ncf
+            setenv MEGAN_EFS /work/MOD3DATA/2016_12US1/surface/megan3.2/EFMAPS_CONUS.ncf
+            setenv MEGAN_LDF /work/MOD3DATA/2016_12US1/surface/megan3.2/LDF_CONUS.ncf
+            if ($BDSNP_MEGAN == 'Y') then
+               setenv BDSNPINP    $OUTDIR/CCTM_BDSNPOUT_${RUNID}_${YESTERDAY}.nc
+               setenv BDSNP_FFILE /work/MOD3DATA/2016_12US1/surface/megan3.2/FERT_CONUS.ncf
+               setenv BDSNP_NFILE /work/MOD3DATA/2016_12US1/surface/megan3.2/NDEP_CONUS.ncf
+               setenv BDSNP_LFILE /work/MOD3DATA/2016_12US1/surface/megan3.2/LANDTYPE_CONUS.ncf
+               setenv BDSNP_AFILE /work/MOD3DATA/2016_12US1/surface/megan3.2/ARID_CONUS.ncf
+               setenv BDSNP_NAFILE /work/MOD3DATA/2016_12US1/surface/megan3.2/NONARID_CONUS.ncf
+            endif
+   endif
+   if ( $CTM_BIOGEMIS_BE == 'Y' ) then   
+      set IN_BEISpath = ${INPDIR}/misc
+      setenv GSPRO          ${BLD}/gspro_biogenics.txt
+      setenv BEIS_NORM_EMIS $IN_BEISpath/beis4_beld6_norm_emis.12US1.ncf
+      setenv BEIS_SOILINP        $OUTDIR/CCTM_BSOILOUT_${RUNID}_${YESTERDAY}.nc
                               #> Biogenic NO soil input file; ignore if NEW_START = TRUE
    endif
 
+
    #> Windblown dust emissions configuration
-   if ( $CTM_WB_DUST == 'Y' ) then
-      # Input variables for BELD3 Landuse option
-      setenv DUST_LU_1 $LUpath/beld3_12US1_459X299_output_a_bench.nc
-      setenv DUST_LU_2 $LUpath/beld4_12US1_459X299_output_tot_bench.nc
-   endif
+   # if ( $CTM_WB_DUST == 'Y' ) then
+   #    # Input variables for BELD3 Landuse option
+   #    setenv DUST_LU_1 $LUpath/beld3_12US1_459X299_output_a_bench.nc
+   #    setenv DUST_LU_2 $LUpath/beld4_12US1_459X299_output_tot_bench.nc
+   # endif
 
 %OCEAN%
 
    #> Bidirectional ammonia configuration
    if ( $CTM_ABFLUX == 'Y' ) then
-      setenv E2C_SOIL ${LUpath}/toCMAQ_festc1.4_epic/us1_2016_cmaq12km_soil.12otc2.ncf
-      setenv E2C_CHEM ${LUpath}/toCMAQ_festc1.4_epic/us1_2016_cmaq12km_time${YYYYMMDD}.12otc2.ncf
-      setenv E2C_CHEM_YEST ${LUpath}/toCMAQ_festc1.4_epic/us1_2016_cmaq12km_time${YESTERDAY}.12otc2.ncf
-      setenv E2C_LU ${LUpath}/beld41_feb2017_waterfix_envcan_12US2.12OTC2.ncf
+      # need to modify for FEST-C v1.4.
+      setenv E2C_SOIL ${EPICpath}/${YYYY}r1_EPIC0509_12US1_soil.nc
+      setenv E2C_CHEM ${EPICpath}/${YYYY}r1_EPIC0509_12US1_time${YYYYMMDD}.nc
+      setenv E2C_LU ${EPICpath}/beld4_12US1_2011.nc
    endif
 
    #> Inline Process Analysis 
@@ -376,6 +414,20 @@ while ($TODAYJ <= $STOP_DAY )  #>Compare dates in terms of YYYYJJJ
          #> Set optional ISAM regions files
          #  setenv ISAM_REGIONS $INPDIR/GRIDMASK_STATES_12SE1.nc
 
+         #> Options used to favor tracked species in reactions for Ozone-NOx chemistry
+         setenv ISAM_O3_WEIGHTS 5   # weights for tracked species Default is 5
+                                    #     OPTIONS
+                                    # 1 does not weight any species
+                                    # 2 weights NOx and subset of NOz species
+                                    # 3 uses with from option 2 plus weight OVOC species, organic radicals and operators
+                                    # 4 weight OVOC species, organic radicals and operators
+                                    # 5 toggles between two weighting set based on VOC and NOx limited ozone production
+         # Below options only used if ISAM_O3_WEIGHTS set to 5
+         setenv ISAM_NOX_CASE  2    # weights for tracked species when ozone production is NOx limited. Default is 2
+         setenv ISAM_VOC_CASE  4    # weights for tracked species when ozone production is VOC limited. Default is 4
+         setenv VOC_NOX_TRANS  0.35 # value of Prod H2O2 over Prod HNO3 less than where 
+                                    # ISAM_VOC_CASE weights are used. Otherwise, ISAM_NOX_CASE
+                                    # weights are used. Default is 0.35
 
       endif
    endif
@@ -392,19 +444,21 @@ while ($TODAYJ <= $STOP_DAY )  #>Compare dates in terms of YYYYJJJ
       endif
    endif
 
-   #> CMAQ-DDM-3D
-   setenv CTM_DDM3D N
-   set NPMAX    = 1
+   #> Decoupled Direct Method in 3D (DDM-3D) Options
+   setenv CTM_DDM3D N    # Sets up requisite script settings for DDM-3D (default is N/F)
+                        # Additionally requires for CCTM to be compiled for DDM-3D simulations
+
+   set NPMAX    = 1      # Number of sensitivity parameters defined in SEN_INPUT
    setenv SEN_INPUT ${WORKDIR}/sensinput.dat
 
-   setenv DDM3D_HIGH N     # allow higher-order sensitivity parameters [ T | Y | F | N ] (default is N/F)
+   setenv DDM3D_HIGH N   # allow higher-order sensitivity parameters in SEN_INPUT [ T | Y | F | N ] (default is N/F)
 
    if ($NEW_START == true || $NEW_START == TRUE ) then
       setenv DDM3D_RST N   # begins from sensitivities from a restart file [ T | Y | F | N ] (default is Y/T)
-      set S_ICpath =
+      set S_ICpath =  # sensitivity fields are initialized to 0.0 on the first hour of the first day
       set S_ICfile =
    else
-      setenv DDM3D_RST Y
+      setenv DDM3D_RST Y  # begins from sensitivities from a restart file [ T | Y | F | N ] (default is Y/T)  
       set S_ICpath = $OUTDIR
       set S_ICfile = CCTM_SENGRID_${RUNID}_${YESTERDAY}.nc
    endif
@@ -438,9 +492,9 @@ while ($TODAYJ <= $STOP_DAY )  #>Compare dates in terms of YYYYJJJ
    setenv CTM_DRY_DEP_1   "$OUTDIR/CCTM_DRYDEP_${CTM_APPL}.nc -v"     #> Hourly Dry Deposition
    setenv CTM_DEPV_DIAG   "$OUTDIR/CCTM_DEPV_${CTM_APPL}.nc -v"       #> Dry Deposition Velocities
    setenv B3GTS_S         "$OUTDIR/CCTM_B3GTS_S_${CTM_APPL}.nc -v"    #> Biogenic Emissions
+   setenv BDSNPOUT        "$OUTDIR/CCTM_BDSNPOUT_${CTM_APPL}.nc"      #> Soil Emissions
    setenv BEIS_SOILOUT    "$OUTDIR/CCTM_BSOILOUT_${CTM_APPL}.nc"      #> Soil Emissions
    setenv MEGAN_SOILOUT   "$OUTDIR/CCTM_MSOILOUT_${CTM_APPL}.nc"      #> Soil Emissions
-   setenv BDSNPOUT        "$OUTDIR/CCTM_BDSNPOUT_${CTM_APPL}.nc"      #> Soil Emissions
    setenv CTM_WET_DEP_1   "$OUTDIR/CCTM_WETDEP1_${CTM_APPL}.nc -v"    #> Wet Dep From All Clouds
    setenv CTM_WET_DEP_2   "$OUTDIR/CCTM_WETDEP2_${CTM_APPL}.nc -v"    #> Wet Dep From SubGrid Clouds
    setenv CTM_ELMO_1      "$OUTDIR/CCTM_ELMO_${CTM_APPL}.nc -v"       #> On-Hour Particle Diagnostics
