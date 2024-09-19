@@ -139,8 +139,8 @@ class CMAQModel:
         else:
             self.MCIP_OUT = self.dirpaths.get('LOC_MCIP')
 
-        self.CCTM_INPDIR = f'{self.CMAQ_DATA}/{self.appl}/input'
-        self.CCTM_OUTDIR = f'{self.CMAQ_DATA}/{self.appl}/output_CCTM_{self.cctm_runid}'
+        self.CCTM_INPDIR = f'{self.CMAQ_DATA}/{self.start_datetime.strftime("%Y-%m-%d")}_{self.appl}/input'
+        self.CCTM_OUTDIR = f'{self.CMAQ_DATA}/{self.start_datetime.strftime("%Y-%m-%d")}_{self.appl}/output_CCTM_{self.cctm_runid}'
         self.ICBC = f'{self.CCTM_INPDIR}/icbc'
         self.CCTM_GRIDDED = f'{self.CCTM_INPDIR}/emis/gridded_area'
         # self.CCTM_RWC = f'{self.CCTM_INPDIR}/emis/gridded_area/rwc'
@@ -717,8 +717,14 @@ class CMAQModel:
             cmd = cmd + '; ' + self.CMD_LN % (
             f'{self.LOC_SMK_MERGE_DATES}/smk_merge_dates_{date.strftime("%Y%m")}*', f'{self.CCTM_INPDIR}/emis')
         os.system(cmd)
-        mwdss_N_lst = utils.get_rep_dates(f'{self.LOC_SMK_MERGE_DATES}', start_datetimes_lst, date_type='  mwdss_N')
-        mwdss_Y_lst = utils.get_rep_dates(f'{self.LOC_SMK_MERGE_DATES}', start_datetimes_lst, date_type='  mwdss_Y')
+        mwdss_N_lst = utils.get_rep_dates(f'{self.LOC_SMK_MERGE_DATES}', 
+                                          start_datetimes_lst, 
+                                          date_type='  mwdss_N',
+                                          remove_dup=False)
+        mwdss_Y_lst = utils.get_rep_dates(f'{self.LOC_SMK_MERGE_DATES}', 
+                                          start_datetimes_lst, 
+                                          date_type='  mwdss_Y',
+                                          remove_dup=False)
 
         # Link the GRIDDESC to $INPDIR
         cmd = self.CMD_LN % (self.GRIDDESC, f'{self.CCTM_INPDIR}/')
@@ -744,6 +750,9 @@ class CMAQModel:
         cmd = cmd + '; ' + self.CMD_LN % (local_init_soil_1_file,
                                           f'{self.CCTM_OUTDIR}/CCTM_SOILOUT_{self.cctm_runid}_{yesterday.strftime("%Y%m%d")}.nc')
 
+        # Link sector list to $INPDIR/emis
+        cmd = cmd + '; ' + self.CMD_LN % (f'{self.SECTORLIST}', f'{self.CCTM_INPDIR}/emis/')
+        
         # Link gridded emissions to $INPDIR/emis/gridded_area
         utils.make_dirs(self.CCTM_GRIDDED)
         for ii in range(1, n_emis_gr + 1):
@@ -795,9 +804,6 @@ class CMAQModel:
                     local_stkgrps_file = f'{self.LOC_IN_PT}/{pt_emis_labs[ii - 1]}/stack_groups_{pt_emis_labs[ii - 1]}_*'
                 cmd = cmd + '; ' + self.CMD_LN % (local_stkgrps_file, f'{self.CCTM_PT}/stack_groups/')
                 cmd_gunzip = cmd_gunzip + ' >/dev/null 2>&1; ' + self.CMD_GUNZIP % (local_stkgrps_file)
-
-        # Link sector list to $INPDIR/emis
-        cmd = cmd + '; ' + self.CMD_LN % (f'{self.SECTORLIST}', f'{self.CCTM_INPDIR}/emis')
 
         # Link files for emissions scaling and sea spray to $INPDIR/land
         # NOTE: these could be made more general...

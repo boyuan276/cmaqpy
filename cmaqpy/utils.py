@@ -197,7 +197,10 @@ def make_dirs(directory):
         os.makedirs(directory, 0o755)
 
 
-def get_rep_dates(smk_dates_dir, dates_list, date_type='  mwdss_N'):
+def get_rep_dates(smk_dates_dir, 
+                  dates_list, 
+                  date_type='  mwdss_N',
+                  remove_dup=False):
     """
     Get representative dates from the files produced by smkmerge.
 
@@ -223,6 +226,8 @@ def get_rep_dates(smk_dates_dir, dates_list, date_type='  mwdss_N'):
         Note that SMOKE appends white space to the beginning of these, so you have 
         to include this white space for this function to run successfully (see function
         header).
+    :param remove_dup: boolean (default=False)
+        If True, remove duplicate dates from the list of representative dates.
     :retrun: `pandas.DatetimeIndex`
         Index of representative dates. 
     """
@@ -230,13 +235,18 @@ def get_rep_dates(smk_dates_dir, dates_list, date_type='  mwdss_N'):
     # Loop through each day in the input list and append the respective representative day to the list
     for date in dates_list:
         d_str = date.strftime("%Y%m")
-        smk_dates = pd.read_csv(f'{smk_dates_dir}/smk_merge_dates_{d_str}.txt', index_col=0, parse_dates=[0], infer_datetime_format=True)
+        smk_dates = pd.read_csv(f'{smk_dates_dir}/smk_merge_dates_{d_str}.txt', 
+                                index_col=0, parse_dates=[0], 
+                                infer_datetime_format=True)
         s = smk_dates[date_type]
         rep_days.append(s[date])
 
-    # Remove duplicates in the represenatitive days 
-    result = [] 
-    [result.append(x) for x in rep_days if x not in result]
+    # Remove duplicates in the representative days
+    if remove_dup: 
+        result = [] 
+        [result.append(x) for x in rep_days if x not in result]
+    else:
+        result = rep_days
 
     # Convert to datetimes
     result = pd.to_datetime(result, format='%Y%m%d') 

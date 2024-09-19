@@ -7,8 +7,8 @@ You should run this inside a tmux window because this ties up the terminal.
 from cmaqpy.runcmaq import CMAQModel
 
 # Specify the start/end times
-start_datetime = "July 02, 2018"  # first day that you want run
-end_datetime = "July 03, 2018"  # DAY AFTER the last day you want run
+start_datetime = "2018-01-02"  # first day that you want run
+end_datetime = "2018-01-17"  # DAY AFTER the last day you want run
 
 # Specify if you want to run the 12 km or the 4 km domain
 appl = "2018_12US1"
