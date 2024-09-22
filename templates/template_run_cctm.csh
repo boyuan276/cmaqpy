@@ -113,7 +113,7 @@ setenv CTM_SFC_HONO Y        #> surface HONO interaction [ default: Y ]
                              #> for dependency on percent urban fraction dataset
 setenv CTM_GRAV_SETL Y       #> vdiff aerosol gravitational sedimentation [ default: Y ]
 # setenv CTM_BIOGEMIS N        #> calculate in-line biogenic emissions [ default: N ]
-setenv CTM_BIOGEMIS_BE N     #> calculate in-line biogenic emissions with BEIS [ default: N ]
+setenv CTM_BIOGEMIS_BE Y     #> calculate in-line biogenic emissions with BEIS [ default: N ]
 setenv CTM_BIOGEMIS_MG N     #> turns on MEGAN biogenic emission [ default: N ]
 setenv BDSNP_MEGAN N         #> turns on BDSNP soil NO emissions [ default: N ]
 
