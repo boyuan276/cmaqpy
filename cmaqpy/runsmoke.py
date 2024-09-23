@@ -60,12 +60,12 @@ class SMOKEModel:
     :param verbose: bool
         When True, additional information is printed to the screen about simulation progress.
     """
-    def __init__(self, appl, grid_name, nei_case_name='2016fh_16j', chem_mech='cmaq_cb6', 
-                 region_desc='12km OTC Domain', sector='ptertac', run_months=[8], ertac_case='CONUS2016', 
+    def __init__(self, appl, grid_name, nei_case_name='2018gg_18j', chem_mech='cmaq_cb6ae7', 
+                 region_desc='Continental US 12km large', sector='ptegu', run_months=[1], ertac_case='CONUS2016', 
                  emisinv_b='2016fh_proj_from_egunoncems_2016version1_ERTAC_Platform_POINT_calcyear2014_27oct2019.csv', 
                  emisinv_c='egunoncems_2016version1_ERTAC_Platform_POINT_27oct2019.csv', 
-                 setup_yaml='dirpaths.yml', compiler='gcc', compiler_vrsn='9.3.1', 
-                 smk_exe_str='Linux2_x86_64gfort', ioapi_exe_str='Linux2_x86_64gfort', verbose=False):
+                 setup_yaml='dirpaths.yml', compiler='gcc', compiler_vrsn='11.3.0', 
+                 smk_exe_str='Linux2_x86_64gfort', ioapi_exe_str='Linux2_x86_64gfort10', verbose=False):
         self.appl = appl
         self.grid_name = grid_name
         self.nei_case_name = nei_case_name
