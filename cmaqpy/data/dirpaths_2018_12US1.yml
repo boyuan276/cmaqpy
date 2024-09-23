@@ -7,7 +7,7 @@ directory_paths:
   DIR_TEMPLATES: '/mnt/Bo_HDD2/cmaq_data/CMAQ_v5.4/cmaqpy/templates'
   InMetDir: '/mnt/Bo_HDD4/wrf_data/met4ene/wrfout/ARW/2018-07-09_8mp4lw2sw2lsm5pbl3cu'
   InGeoDir: '/mnt/Bo_HDD4/wrf_data/data/domain/12US1'
-  NEI_HOME: '/mnt/Bo_HDD5/emissions_data/2018v2platform/2018gg'
+  NEI_HOME: '/mnt/Bo_HDD5/emissions_data/2018v2platform'
   LOC_IC: '/media/by276/Bo_HDD3/cmaq_data/2018_12US1/icbc'
   LOC_BC: '/media/by276/Bo_HDD3/cmaq_data/2018_12US1/icbc/CMAQv54_2018_108NHEMI_M3DRY'
   LOC_GR_EMIS_001: '/media/by276/Bo_HDD3/cmaq_data/2018_12US1/emis/cb6r3_ae6_20200131_MYR/cmaq_ready/merged_nobeis_norwc'
@@ -24,7 +24,7 @@ directory_paths:
 file_paths:
   # GRIDDESC: '/share/mzhang/jas983/cmaq_data/CMAQ_v5.3.3/2016_12OTC2/mcip/GRIDDESC'
   GRIDDESC: '/media/by276/Bo_HDD3/cmaq_data/2018_12US1/GRIDDESC'
-  SECTORLIST: '/mnt/Bo_HDD5/emissions_data/2018v2platform/smoke_2018gg_2032gg2_core_25jul2023/2018gg_18j/scripts/sectorlist_2018gg'
+  SECTORLIST: '/mnt/Bo_HDD5/emissions_data/2018v2platform/2018gg_18j/scripts/sectorlist_2018gg'
 file_names:
   BCFILE: 'BCON_CONC_12US1_CMAQv54_2018_108NHEMI_M3DRY_regrid_${YYYYMM}.nc'
   OCEAN_1: '12US1_surf.ncf'
