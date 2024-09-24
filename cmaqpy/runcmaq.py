@@ -139,8 +139,8 @@ class CMAQModel:
         else:
             self.MCIP_OUT = self.dirpaths.get('LOC_MCIP')
 
-        self.CCTM_INPDIR = f'{self.CMAQ_DATA}/{self.start_datetime.strftime("%Y-%m-%d")}_{self.appl}/input'
-        self.CCTM_OUTDIR = f'{self.CMAQ_DATA}/{self.start_datetime.strftime("%Y-%m-%d")}_{self.appl}/output_CCTM_{self.cctm_runid}'
+        self.CCTM_INPDIR = f'{self.CMAQ_DATA}/{self.start_datetime.strftime("%Y-%m-%d")}_{self.end_datetime.strftime("%Y-%m-%d")}_{self.appl}/input'
+        self.CCTM_OUTDIR = f'{self.CMAQ_DATA}/{self.start_datetime.strftime("%Y-%m-%d")}_{self.end_datetime.strftime("%Y-%m-%d")}_{self.appl}/output_CCTM_{self.cctm_runid}'
         self.ICBC = f'{self.CCTM_INPDIR}/icbc'
         self.CCTM_GRIDDED = f'{self.CCTM_INPDIR}/emis/gridded_area'
         # self.CCTM_RWC = f'{self.CCTM_INPDIR}/emis/gridded_area/rwc'
@@ -746,9 +746,9 @@ class CMAQModel:
         local_init_medc_1_file = f'{self.LOC_IC}/CCTM_MEDIA_CONC_*{yesterday.strftime("%y%m%d")}.nc'
         cmd = cmd + '; ' + self.CMD_LN % (local_init_medc_1_file,
                                           f'{self.CCTM_OUTDIR}/CCTM_MEDIA_CONC_{self.cctm_runid}_{yesterday.strftime("%Y%m%d")}.nc')
-        local_init_soil_1_file = f'{self.LOC_IC}/CCTM_SOILOUT_*{yesterday.strftime("%y%m%d")}.nc'
+        local_init_soil_1_file = f'{self.LOC_IC}/CCTM_BSOILOUT_*{yesterday.strftime("%y%m%d")}.nc'
         cmd = cmd + '; ' + self.CMD_LN % (local_init_soil_1_file,
-                                          f'{self.CCTM_OUTDIR}/CCTM_SOILOUT_{self.cctm_runid}_{yesterday.strftime("%Y%m%d")}.nc')
+                                          f'{self.CCTM_OUTDIR}/CCTM_BSOILOUT_{self.cctm_runid}_{yesterday.strftime("%Y%m%d")}.nc')
 
         # Link sector list to $INPDIR/emis
         cmd = cmd + '; ' + self.CMD_LN % (f'{self.SECTORLIST}', f'{self.CCTM_INPDIR}/emis/')
