@@ -11,13 +11,13 @@ start_datetime = "2018-07-02"  # first day that you want run
 end_datetime = "2018-07-09"  # DAY AFTER the last day you want run
 
 # Specify if you want to run the 12 km or the 4 km domain
-appl = "2018_12US1"
+appl = "2032_12US1"
 
 # Specify if you want to run or just setup cctm
 setup_only = False
 
 # Define the coordinate name (must match that in GRIDDESC)
-if "2018_12US1" in appl:
+if "2032_12US1" in appl:
     coord_name = "LAM_40N97W"
     grid_name = "12US1"
 else:
@@ -53,11 +53,11 @@ cmaq_sim.run_cctm(
     n_emis_pt=10,
     pt_emis_labs=[
         "ptnonipm",
-        "ptegu",
+        "ptegu_winter",
         "othpt",
         "ptagfire",
-        "ptfire",
-        "ptfire_grass",
+        "ptfire-rx",
+        "ptfire-wild",
         "ptfire_othna",
         "pt_oilgas",
         "cmv_c1c2_12",
@@ -65,8 +65,8 @@ cmaq_sim.run_cctm(
     ],
     stkgrps_daily=[False, False, False, True, True, True, True, False, False, False],
     ctm_abflux="Y",
-    stkcaseg="12US1_WR413_MYR_2018",
-    stkcasee="12US1_cmaq_cb6_WR413_MYR_2018",
+    stkcaseg="12US1_2032gg2_18j",
+    stkcasee="12US1_cmaq_cb6ae7_2032gg2_18j",
     delete_existing_output="TRUE",
     new_sim="FALSE",
     tstep="010000",
