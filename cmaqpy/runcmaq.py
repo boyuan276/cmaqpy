@@ -761,7 +761,7 @@ class CMAQModel:
             if self.verbose:
                 print(f'Linking gridded emissions from:\n{gr_emis_dir}')
             for date in start_datetimes_lst:
-                local_gridded_file = f'{gr_emis_dir}/emis_mole_{gr_emis_labs[ii - 1]}_{date.strftime("%Y%m%d")}*.nc'
+                local_gridded_file = f'{gr_emis_dir}/emis_mole_{gr_emis_labs[ii - 1]}_{date.strftime("%Y%m%d")}*'
                 if self.verbose:
                     print(f'... Linking: {local_gridded_file}')
                 cmd = cmd + '; ' + self.CMD_LN % (local_gridded_file, f'{self.CCTM_GRIDDED}/')
@@ -786,14 +786,14 @@ class CMAQModel:
                 if pt_emis_labs[ii - 1] == 'ptertac':
                     local_point_file = f'{self.LOC_ERTAC}/inln_mole_ptertac_{date.strftime("%Y%m%d")}*.nc'
                 else:
-                    local_point_file = f'{self.LOC_IN_PT}/{pt_emis_labs[ii - 1]}/inln_mole_{pt_emis_labs[ii - 1]}_{date.strftime("%Y%m%d")}*.nc'
+                    local_point_file = f'{self.LOC_IN_PT}/{pt_emis_labs[ii - 1]}/inln_mole_{pt_emis_labs[ii - 1]}_{date.strftime("%Y%m%d")}*'
                 if self.verbose:
                     print(f'... Linking: {local_point_file}')
                 cmd = cmd + '; ' + self.CMD_LN % (local_point_file, f'{self.CCTM_PT}/')
                 cmd_gunzip = cmd_gunzip + ' >/dev/null 2>&1; ' + self.CMD_GUNZIP % (local_point_file)
                 # Link the day-dependent stack groups file (e.g., for fire sectors)
                 if stkgrps_daily[ii - 1]:
-                    local_stkgrps_file = f'{self.LOC_IN_PT}/{pt_emis_labs[ii - 1]}/stack_groups_{pt_emis_labs[ii - 1]}_{date.strftime("%Y%m%d")}*.nc'
+                    local_stkgrps_file = f'{self.LOC_IN_PT}/{pt_emis_labs[ii - 1]}/stack_groups_{pt_emis_labs[ii - 1]}_{date.strftime("%Y%m%d")}*'
                     cmd = cmd + '; ' + self.CMD_LN % (local_stkgrps_file, f'{self.CCTM_PT}/stack_groups/')
                     cmd_gunzip = cmd_gunzip + ' >/dev/null 2>&1; ' + self.CMD_GUNZIP % (local_stkgrps_file)
             # Link the day-independent stack groups file
