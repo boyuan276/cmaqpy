@@ -53,7 +53,7 @@ cmaq_sim.run_cctm(
     n_emis_pt=10,
     pt_emis_labs=[
         "ptnonipm",
-        "ptegu_winter",
+        "ptegu_summer", # NOTE: "ptegu_winter",
         "othpt",
         "ptagfire",
         "ptfire-rx",
