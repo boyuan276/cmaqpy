@@ -26,7 +26,7 @@ else:
 new_mcip = False  # Use existing MCIP data
 
 # Create a CMAQModel object.
-# Note that we use exiting BCON data, so we set new_bcon=False.
+# NOTE: We use exiting BCON data, so we set new_bcon=False.
 cmaq_sim = CMAQModel(
     start_datetime,
     end_datetime,

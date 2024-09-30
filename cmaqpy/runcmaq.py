@@ -311,7 +311,9 @@ class CMAQModel:
                 print(f'MCIP ran in: {utils.strfdelta(elapsed)}\n')
         return True
 
-    def run_mcip_multiday(self, metfile_dir=None, metfile_list=[], geo_file='geo_em.d01.nc', t_step=60):
+    def run_mcip_multiday(self, metfile_dir=None, metfile_list=[], 
+                          geo_file='geo_em.d01.nc', t_step=60,
+                          setup_only=False):
         """
         Run MCIP over multiple days. Per CMAQ convention, daily MCIP files contain
         25 hours each all the hours from the current day, and the first hour (00:00)
@@ -349,7 +351,7 @@ class CMAQModel:
 
             # run mcip for that day
             self.run_mcip(mcip_start_datetime=mcip_start_datetime, mcip_end_datetime=mcip_end_datetime,
-                          metfile_list=metfile_list, geo_file=geo_file, t_step=t_step, setup_only=False)
+                          metfile_list=metfile_list, geo_file=geo_file, t_step=t_step, setup_only=setup_only)
 
     def run_icon(self, icon_start_datetime=None, icon_end_datetime=None, 
                  coarse_grid_appl='coarse', run_hours=2, setup_only=False):
