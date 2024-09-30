@@ -5,7 +5,7 @@ directory_paths:
   CMAQ_HOME: '/mnt/Bo_HDD2/cmaq_data/CMAQ_v5.4'
   CMAQ_DATA: '/mnt/Bo_HDD2/cmaq_data/CMAQ_v5.4/data'
   DIR_TEMPLATES: '/mnt/Bo_HDD2/cmaq_data/CMAQ_v5.4/cmaqpy/templates'
-  InMetDir: '/mnt/Bo_HDD4/wrf_data/met4ene/wrfout/ARW/2018-04-10_8mp4lw2sw2lsm5pbl3cu'
+  InMetDir: '/mnt/Bo_HDD4/wrf_data/met4ene/wrfout/ARW/2018-01-20_8mp4lw2sw2lsm5pbl3cu'
   InGeoDir: '/mnt/Bo_HDD4/wrf_data/data/domain/12US1'
   NEI_HOME: '/mnt/Bo_HDD5/emissions_data/2018v2platform'
   LOC_IC: '/media/by276/Bo_HDD3/cmaq_data/2018_12US1/icbc'
@@ -17,7 +17,7 @@ directory_paths:
   LOC_LAND: '/media/by276/Bo_HDD3/cmaq_data/2018_12US1/epic'
   LOC_SURF: '/media/by276/Bo_HDD3/cmaq_data/2018_12US1/surface'
   LOC_BEIS: '/media/by276/Bo_HDD3/cmaq_data/2018_12US1/misc'
-  LOC_MCIP: '/media/by276/Bo_HDD3/cmaq_data/2018_12US1/met/WRFv4.3.3_LTNG_MCIP5.3.3_compressed'
+  LOC_MCIP: '/mnt/Bo_HDD2/cmaq_data/CMAQ_v5.4/data/2018_12US1/mcip'
   SMOKE_HOME: '/home/by276/models/smoke/smokev4.7'
 file_paths:
   GRIDDESC: '/media/by276/Bo_HDD3/cmaq_data/2018_12US1/GRIDDESC'
