@@ -5,22 +5,21 @@ Note that MCIP will fail if your `start_datetime` is not AFTER the fist timestep
 your wrfout*.nc file.
 """
 
+import os
 from cmaqpy.runcmaq import CMAQModel
 
-start_datetime = "July 9, 2018"  # first day that you want processed
-end_datetime = "July 10, 2018"  # ONE DAY AFTER the last day you want processed
+start_datetime = "2018-04-11"  # first day that you want processed
+end_datetime = "2018-04-21"  # ONE DAY AFTER the last day you want processed
 
 # Specify if you want to run the 12 km or the 4 km domain
-# appl = '2016_12OTC2'
 appl = "2018_12US1"
 
-coord_name = "LAM_40N97W"
-if appl == "2016_12OTC2":
-    grid_name = "12OTC2"
-elif appl == "2016_4OTC2":
-    grid_name = "4OTC2"
-elif appl == "2018_12US1":
+# Define the coordinate name (must match that in GRIDDESC)
+if "2018_12US1" in appl:
+    coord_name = "LAM_40N97W"
     grid_name = "12US1"
+else:
+    raise ValueError(f"Unknown application: {appl}")
 
 # Create a CMAQModel object
 cmaq_sim = CMAQModel(
@@ -37,18 +36,17 @@ cmaq_sim = CMAQModel(
 )
 
 # Specify the meteorolocial files
-if appl == "2016_12OTC2":
-    metfile_list = ["wrfout_d01_2016-08-05_00:00:00"]
-elif appl == "2016_4OTC2":
-    metfile_list = ["wrfout_d02_2016-08-05_00:00:00"]
+metfile_dir = "/mnt/Bo_HDD4/wrf_data/met4ene/wrfout/ARW/2018-04-10_8mp4lw2sw2lsm5pbl3cu"
+assert os.path.exists(metfile_dir), f"Directory {metfile_dir} does not exist!"
+metfile_list = [
+    "wrfout_d01_2018-04-10_00:00:00",
+]
 
 # Call the "run_mcip" method
-# TODO: Specify metfile_dir according to WRF output files
-if appl == "2016_12OTC2":
-    cmaq_sim.run_mcip_multiday(
-        metfile_dir=None, metfile_list=metfile_list, geo_file="geo_em.d01.nc", t_step=60
-    )
-elif appl == "2016_4OTC2":
-    cmaq_sim.run_mcip_multiday(
-        metfile_dir=None, metfile_list=metfile_list, geo_file="geo_em.d02.nc", t_step=60
-    )
+cmaq_sim.run_mcip_multiday(
+    metfile_dir=metfile_dir,
+    metfile_list=metfile_list,
+    geo_file="geo_em.d01.nc",
+    t_step=60,
+    setup_only=False
+)
