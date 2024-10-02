@@ -149,7 +149,7 @@ class CMAQModel:
         self.CCTM_LAND = f'{self.CCTM_INPDIR}/land'
         self.CCTM_SURF = f'{self.CCTM_INPDIR}/surface'
         self.CCTM_BEIS = f'{self.CCTM_INPDIR}/misc'
-        self.POST = f'{self.CMAQ_DATA}/{self.appl}/post'
+        self.POST = f'{self.CMAQ_DATA}/{self.start_datetime.strftime("%Y-%m-%d")}_{self.end_datetime.strftime("%Y-%m-%d")}_{self.appl}/post'
 
         if new_icon:
             self.LOC_IC = self.CCTM_OUTDIR
@@ -1122,7 +1122,8 @@ class CMAQModel:
                 sys.stdout.flush()
         return True
 
-    def run_combine(self, run_hours=2, mem_per_node=20, combine_vrsn='v54'):
+    def run_combine(self, run_hours=2, mem_per_node=20, combine_vrsn='v54',
+                    setup_only=False):
         """
         Setup and run the combine program. Combine is a CMAQ post-processing program that formats 
         the CCTM output data in a more convenient way.
@@ -1138,7 +1139,7 @@ class CMAQModel:
         """
         ## Setup Combine
         # Copy the template combine run script to the scripts directory
-        run_combine_path = f'{self.COMBINE_SCRIPTS}/run_combine.csh'
+        run_combine_path = f'{self.COMBINE_SCRIPTS}/run_combine_{self.appl}.csh'
         cmd = self.CMD_CP % (f'{self.DIR_TEMPLATES}/template_run_combine.csh', run_combine_path)
         os.system(cmd)
 
@@ -1201,9 +1202,12 @@ class CMAQModel:
         combine_setup += f'setenv SPEC_DEP  {self.COMBINE_SCRIPTS}/spec_def_files/SpecDef_Dep_{self.chem_mech}.txt\n'
         utils.write_to_template(run_combine_path, combine_setup, id='%SETUP%')
 
-        # Submit combine to slurm
-        CMD_COMBINE = f'sbatch --requeue {run_combine_path}'
-        os.system(CMD_COMBINE)
+        if not setup_only:
+            # Submit combine to slurm
+            CMD_COMBINE = f'sbatch --requeue {run_combine_path}'
+            os.system(CMD_COMBINE)
+
+        return True
 
     def finish_check(self, program, custom_log=None):
         """
