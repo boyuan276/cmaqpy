@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 import cartopy.crs as ccrs
 import cartopy.io.shapereader as shpreader
+import cartopy.feature as cfeature
 from matplotlib import cm
 from matplotlib import colors
 import monet as m
@@ -167,9 +169,20 @@ def conc_map(plot_var: xr.DataArray,
         edgecolor="black"
     )
 
+    # # Create a custom feature for US counties
+    # us_counties = cfeature.NaturalEarthFeature(
+    #     category='cultural',
+    #     name='admin_2_counties',
+    #     scale='10m',
+    #     facecolor='none'
+    # )
+
+    # # Add the US counties feature to the plot
+    # ax.add_feature(us_counties, edgecolor='black', linewidth=0.5)
+
     # Add features to the maps
-    # ax.add_feature(cfeature.LAKES)
-    # ax.add_feature(cfeature.OCEAN)
+    # ax.add_feature(cfeature.LAKES, alpha=0.5)
+    # ax.add_feature(cfeature.OCEAN, alpha=0.5)
 
     # Add color bars
     if "cbar_ticks" not in cbar_args:
