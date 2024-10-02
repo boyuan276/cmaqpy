@@ -5,7 +5,7 @@ directory_paths:
   CMAQ_HOME: '/mnt/Bo_HDD2/cmaq_data/CMAQ_v5.4'
   CMAQ_DATA: '/mnt/Bo_HDD2/cmaq_data/CMAQ_v5.4/data'
   DIR_TEMPLATES: '/mnt/Bo_HDD2/cmaq_data/CMAQ_v5.4/cmaqpy/templates'
-  InMetDir: '/mnt/Bo_HDD4/wrf_data/met4ene/wrfout/ARW/2018-04-10_8mp4lw2sw2lsm5pbl3cu'
+  InMetDir: '/mnt/Bo_HDD4/wrf_data/met4ene/wrfout/ARW/2018-04-20_8mp4lw2sw2lsm5pbl3cu'
   InGeoDir: '/mnt/Bo_HDD4/wrf_data/data/domain/12US1'
   NEI_HOME: '/mnt/Bo_HDD5/emissions_data/2018v2platform'
   LOC_IC: '/media/by276/Bo_HDD3/cmaq_data/2018_12US1/icbc'
