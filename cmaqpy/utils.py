@@ -6,9 +6,12 @@ Known Issues/Wishlist:
 """
 import datetime
 import os
+import numpy as np
 import pandas as pd
 import string
 from shutil import rmtree
+from scipy.spatial import cKDTree
+from wrf import latlonutils as llutils
 
 
 def format_date(in_date):
@@ -278,3 +281,77 @@ def convert_tz_xr(ds, input_tz='UTC', output_tz='US/Eastern', time_coord='time')
     tidx_in = ds.time.to_index().tz_localize(tz=input_tz)
     ds.coords[time_coord] = tidx_in.tz_convert(output_tz).tz_localize(None)
     return ds
+
+def _get_proj_params(met_data):
+    """
+    Return the map projection parameters.
+
+    Args:
+        met_data (:class:`xarray.Dataset`): WRF-ARW Dataset
+    Returns:
+    """
+    # Extract the global attributes from the xarray dataset
+    map_proj = met_data.attrs["MAP_PROJ"]
+    truelat1 = met_data.attrs["P_ALP"]
+    truelat2 = met_data.attrs["P_BET"]
+    stdlon = met_data.attrs['XCENT']
+    dx = met_data.attrs['XCELL']
+    dy = met_data.attrs['YCELL']
+    pole_lat = 90.0
+    pole_lon = 0.0
+    latinc = 0.0
+    loninc = 0.0
+
+    xlat = met_data.longitude
+    xlon = met_data.latitude
+
+    # Not so sure about these...
+    ref_lat = np.ravel(xlat[..., 0, 0])
+    ref_lon = np.ravel(xlon[..., 0, 0])
+
+    # Note: fortran index
+    known_x = 1.0
+    known_y = 1.0
+
+    return (map_proj, truelat1, truelat2, stdlon, ref_lat, ref_lon,
+            pole_lat, pole_lon, known_x, known_y, dx, dy, latinc, loninc)
+
+
+def ll_to_xy(met_data, latitude, longitude):
+    """
+    Returns an (x,y) location for an input meteorological dataset.
+    Note that only a single latitude, longitude pair is accepted at
+    this time.
+
+    :param met_data :class:`xarray.Dataset`: Input meteorological dataset
+        (generally output from WRF as the proj parameters.
+        currently require the WRF naming scheme).
+    :param latitude :obj:`float`: Latitude coordinate
+        to convert to x, y indicies.
+    :param longitude :obj:`float`: Longitude coordinate
+        to convert to x, y indicies.
+    :return result :obj:`list`: x, y indicies.
+    """
+    # Extract the projection parameters from the xarray global attributes
+    (map_proj, truelat1, truelat2, stdlon, ref_lat, ref_lon,
+     pole_lat, pole_lon, known_x, known_y, dx, dy, latinc,
+     loninc) = _get_proj_params(met_data)
+
+    result = np.empty((2,), np.float64)
+    # The following function wraps an old fortran program that finds the nearest indicies given
+    # a lat, lon pair
+    fort_out = llutils._lltoxy(map_proj, truelat1, truelat2, stdlon,
+                               ref_lat, ref_lon, pole_lat, pole_lon,
+                               known_x, known_y, dx, dy, latinc, loninc,
+                               latitude, longitude)
+    # Note, comes back from fortran as y,x.  So, need to swap them.
+    result[0] = fort_out[1]
+    result[1] = fort_out[0]
+
+    # Make indexes 0-based
+    result = result - 1
+
+    # Make the result an integer
+    result = np.rint(result).astype(int)
+
+    return result
