@@ -2,6 +2,11 @@
 This example shows how to run the CCTM benchmark case using the `CMAQModel` class.
 
 You should run this inside a tmux window because this ties up the terminal.
+
+NOTE: Need to manually link PTEGU inline and stack group files to the correct directories.
+NOTE: Need to manually change names of MCIP files YYYYMMDD to YYMMDD.
+NOTE: Need to manually change inln_mole and stack group file names in dirpaths_2032_12US1_nygrid.yml
+      for the ptegu sector: ptegu_winter/ptegu_summer/ptegu_wintershld
 """
 
 from cmaqpy.runcmaq import CMAQModel
@@ -11,13 +16,13 @@ start_datetime = "2018-07-02"  # first day that you want run
 end_datetime = "2018-07-09"  # DAY AFTER the last day you want run
 
 # Specify if you want to run the 12 km or the 4 km domain
-appl = "2032_12US1"
+appl = "2032_12US1_nygrid"
 
 # Specify if you want to run or just setup cctm
 setup_only = False
 
 # Define the coordinate name (must match that in GRIDDESC)
-if "2032_12US1" in appl:
+if "2032_12US1_nygrid" in appl:
     coord_name = "LAM_40N97W"
     grid_name = "12US1"
 else:
@@ -53,7 +58,7 @@ cmaq_sim.run_cctm(
     n_emis_pt=10,
     pt_emis_labs=[
         "ptnonipm",
-        "ptegu_summer", # NOTE: "ptegu_winter",
+        "ptegu_summer", # NOTE: "ptegu_winter/wintershld/summer",
         "othpt",
         "ptagfire",
         "ptfire-rx",
